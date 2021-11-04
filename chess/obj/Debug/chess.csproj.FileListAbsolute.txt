@@ -1,0 +1,14 @@
+C:\Users\User\Desktop\chess\chess\obj\Debug\chess.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\chess\chess\obj\Debug\chess.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\chess\chess\bin\Debug\chess.exe.config
+C:\Users\User\Desktop\chess\chess\bin\Debug\chess.exe
+C:\Users\User\Desktop\chess\chess\bin\Debug\chess.pdb
+C:\Users\User\Desktop\chess\chess\obj\Debug\chess.exe
+C:\Users\User\Desktop\chess\chess\obj\Debug\chess.pdb
+C:\Users\User\Desktop\chess node\chess\obj\Debug\chess.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\chess node\chess\obj\Debug\chess.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\chess node\chess\obj\Debug\chess.exe
+C:\Users\User\Desktop\chess node\chess\obj\Debug\chess.pdb
+C:\Users\User\Desktop\chess node\chess\bin\Debug\chess.exe.config
+C:\Users\User\Desktop\chess node\chess\bin\Debug\chess.exe
+C:\Users\User\Desktop\chess node\chess\bin\Debug\chess.pdb

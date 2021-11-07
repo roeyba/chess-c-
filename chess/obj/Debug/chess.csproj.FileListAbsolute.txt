@@ -19,3 +19,10 @@ C:\Users\TALMIDIM\Desktop\chess-c--master\chess\obj\Debug\chess.pdb
 C:\Users\TALMIDIM\Desktop\chess-c--master\chess\bin\Debug\chess.exe.config
 C:\Users\TALMIDIM\Desktop\chess-c--master\chess\bin\Debug\chess.exe
 C:\Users\TALMIDIM\Desktop\chess-c--master\chess\bin\Debug\chess.pdb
+C:\Users\roey2\OneDrive\Desktop\chess node\chess\obj\Debug\chess.csproj.AssemblyReference.cache
+C:\Users\roey2\OneDrive\Desktop\chess node\chess\obj\Debug\chess.csproj.CoreCompileInputs.cache
+C:\Users\roey2\OneDrive\Desktop\chess node\chess\obj\Debug\chess.exe
+C:\Users\roey2\OneDrive\Desktop\chess node\chess\obj\Debug\chess.pdb
+C:\Users\roey2\OneDrive\Desktop\chess node\chess\bin\Debug\chess.exe.config
+C:\Users\roey2\OneDrive\Desktop\chess node\chess\bin\Debug\chess.exe
+C:\Users\roey2\OneDrive\Desktop\chess node\chess\bin\Debug\chess.pdb

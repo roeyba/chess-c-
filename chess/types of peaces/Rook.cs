@@ -18,7 +18,7 @@ namespace chess.types_of_peaces
         public List<Move> getmoves()
         {
             List<Move> moves = new List<Move>();
-            this
+            
             return moves;
         }
 

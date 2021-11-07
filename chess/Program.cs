@@ -31,8 +31,9 @@ namespace chess
             c.manualy_makemove(one);
             c.manualy_makemove(two);
             Console.WriteLine(c.ToStringfromlist());
-            */
+            
             c.unmakemove(); c.unmakemove();
+            */
             Console.WriteLine(c.ToStringfromlist());
 
             Console.WriteLine(c.whitetomove);

@@ -90,5 +90,12 @@ namespace chess
             return this.position % 8;
         }
 
+        public List<Move> getmoves_sliding_pc()
+        {
+            List<Move> moves = new List<Move>();
+
+            return moves;
+        }
+
     }
 }

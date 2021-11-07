@@ -23,11 +23,38 @@ namespace chess
         }
     }
 
-    class Movegenerator
+    public class Movegenerator
     {
-        public static List<Move> generate_moves(chessboard c)
+        public static chessboard c;
+
+        public Movegenerator(chessboard chess)
         {
-            List<Move> moves= new List<Move>();
+            c = chess;
+        }
+        public static List<Move> generate_moves()
+        {
+            List<Move> moves = new List<Move>();
+            if (c.whitetomove)
+            {
+                for (int i = 0; i < chessboard.peaces_types_amount; i++)
+                {
+                    foreach (Peace peace in c.white_parts[i])
+                    {
+                        //moves.AddRange(peace.get_moves());
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < chessboard.peaces_types_amount; i++)
+                {
+                    foreach (Peace peace in c.black_parts[i])
+                    {
+                        //moves.AddRange(peace.get_moves());
+                    }
+                }
+            }
+            
             //check whose turn it is to play
             //go over all of the peaces of the curren player and for each peace add its moves to the "moves" list
             //go over all of the peaces and delete the moves where the curent player peaces are interfiting with the move

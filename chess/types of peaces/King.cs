@@ -13,9 +13,7 @@ namespace chess.types_of_peaces
         public King(bool iswhitee, int position) : base(iswhitee, position)
         {
             this.can_custle = true;
-            this.iswhite = iswhitee;
             this.type = 5;
-            this.position = position;
         }
     }
 }

@@ -10,8 +10,6 @@ namespace chess.types_of_peaces
     {
         public Queen(bool iswhitee, int position) : base(iswhitee, position)
         {
-            this.iswhite = iswhitee;
-            this.position = position;
             this.type = 4;
         }
     }

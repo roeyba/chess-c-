@@ -315,9 +315,6 @@ namespace chess
                     else
                         Console.WriteLine("second peace on the same position: " + peace.ToString());
                 }
-            }
-            for (int i = 0; i < chessboard.peaces_types_amount; i++)
-            {
                 foreach (Peace peace in this.black_parts[i])
                 {
                     if (board2[get_i_pos(peace.position), get_j_pos(peace.position)] == '.')

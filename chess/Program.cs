@@ -1,6 +1,7 @@
 ﻿using chess.types_of_peaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,13 +12,16 @@ namespace chess
     {
         static void Main(string[] args)
         {
+            Stopwatch stopwatch = new Stopwatch(); stopwatch.Start();
+
             Console.ForegroundColor = ConsoleColor.Red;
             chessboard c = new chessboard();
 
             Console.WriteLine(c.whitetomove);
 
             Movegenerator m = new Movegenerator(c);
-            List<Move> moves = Movegenerator.generate_moves();
+            List<Move> moves = m.generate_moves();
+            
             foreach (Move move in moves)
             {
                 c.manualy_makemove(move);
@@ -37,6 +41,9 @@ namespace chess
             Console.WriteLine(c.ToStringfromlist());
 
             Console.WriteLine(c.whitetomove);
+            
+
+            stopwatch.Stop(); Console.WriteLine("Elapsed Time is {0} ms", stopwatch.ElapsedMilliseconds);
             Console.ReadLine();
         }
     }

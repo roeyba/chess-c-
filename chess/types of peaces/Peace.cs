@@ -8,7 +8,7 @@ namespace chess
 {
     public class Peace
     {
-        //const is unchangeble variable and it is static
+        //const is unchangeble variable and it's static
         public const int Pawn   = 0;
         public const int Knight = 1;
         public const int Bishop = 2;
@@ -90,12 +90,6 @@ namespace chess
             return this.position % 8;
         }
 
-        public List<Move> getmoves_sliding_pc()
-        {
-            List<Move> moves = new List<Move>();
-
-            return moves;
-        }
 
     }
 }

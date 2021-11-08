@@ -25,24 +25,28 @@ namespace chess
 
     public class Movegenerator
     {
-        public static chessboard c;
+        public chessboard c;
 
         public Movegenerator(chessboard chess)
         {
             c = chess;
         }
-        public static List<Move> generate_moves()
+
+        //generates all the legal moves that exist in this chess board position
+        // all the generated moves return ass a list that contain move objects
+        public List<Move> generate_moves()
         {
             List<Move> moves = new List<Move>();
-            if (c.whitetomove)
+            if (this.c.whitetomove)
             {
                 for (int i = 0; i < chessboard.peaces_types_amount; i++)
                 {
                     foreach (Peace peace in c.white_parts[i])
                     {
-                        //moves.AddRange(peace.get_moves());
+                        
                     }
                 }
+
             }
             else
             {
@@ -50,7 +54,7 @@ namespace chess
                 {
                     foreach (Peace peace in c.black_parts[i])
                     {
-                        //moves.AddRange(peace.get_moves());
+                        
                     }
                 }
             }
@@ -61,6 +65,82 @@ namespace chess
             //delete the moves that cause the curent player king to be in check
 
 
+
+            return moves;
+        }
+        public List<Move> getmoves_sliding_pc(Peace peace)
+        {
+            int i = peace.get_i_pos();
+            int j = peace.get_j_pos();
+            List<Move> moves = new List<Move>();
+            
+            //generate all the moves right to the player
+            for(int t = j+1; t < chessboard.board_size; t++)
+            {
+                if (!this.c.board[i, t].isocupied())
+                {
+                    moves.Add(new Move(peace.position,i*8+t));
+                }
+                else
+                {
+                    if(peace.iswhite != c.board[i, t].Peace.iswhite)
+                        moves.Add(new Move(peace.position, i * 8 + t));
+                    break;
+                }
+                    
+            }
+
+            //generate all the moves left to the player
+            for (int t = j -1; t >= 0; t--)
+            {
+                if (!this.c.board[i, t].isocupied())
+                {
+                    moves.Add(new Move(peace.position, i * 8 + t));
+                }
+                else
+                {
+                    if (peace.iswhite != c.board[i, t].Peace.iswhite)
+                        moves.Add(new Move(peace.position, i * 8 + t));
+                    break;
+                }
+            }
+
+            //generate all the moves on top of the player
+            for (int t = i+1; t< chessboard.board_size; t++)
+            {
+                if (!this.c.board[t, j].isocupied())
+                {
+                    moves.Add(new Move(peace.position, t * 8 + j));
+                }
+                else
+                {
+                    if (peace.iswhite != c.board[t, j].Peace.iswhite)
+                        moves.Add(new Move(peace.position, t * 8 + j));
+                    break;
+                }
+            }
+
+            //generate all the moves down the player
+            for (int t = i -1; t >= 0; t--)
+            {
+                if (!this.c.board[t, j].isocupied())
+                {
+                    moves.Add(new Move(peace.position, t * 8 + j));
+                }
+                else
+                {
+                    if (peace.iswhite != c.board[t, j].Peace.iswhite)
+                        moves.Add(new Move(peace.position, t * 8 + j));
+                    break;
+                }
+            }
+
+            return moves;
+        }
+        
+        public List<Move> getmoves_diagonal_pc(int position)
+        {
+            List<Move> moves = new List<Move>();
 
             return moves;
         }

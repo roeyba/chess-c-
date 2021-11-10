@@ -16,8 +16,7 @@ namespace chess
 
             Console.ForegroundColor = ConsoleColor.Red;
             chessboard c = new chessboard();
-
-            Console.WriteLine(c.whitetomove);
+            Console.WriteLine(c.ToString());
 
             Movegenerator m = new Movegenerator(c);
             List<Move> moves = m.generate_moves();
@@ -40,10 +39,7 @@ namespace chess
             */
             Console.WriteLine(c.ToStringfromlist());
 
-            Console.WriteLine(c.whitetomove);
-            
-
-            stopwatch.Stop(); Console.WriteLine("Elapsed Time is {0} ms", stopwatch.ElapsedMilliseconds);
+            stopwatch.Stop(); Console.WriteLine("Elapsed Time is {0} seconds", (float)stopwatch.ElapsedMilliseconds/1000);
             Console.ReadLine();
         }
     }

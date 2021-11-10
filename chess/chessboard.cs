@@ -109,10 +109,13 @@ namespace chess
             initialize_objects();
 
             //create all of the pawns
-            for (int i = 0; i < 8; i++) 
+            for (int j = 0; j < 8; j++) 
             {
-                addpeacetoboard(new Pawn(false, i + 8));
-                addpeacetoboard(new Pawn(true, i + 48));
+                addpeacetoboard(new Pawn(false, j + 8));
+                if(j !=3)
+                    addpeacetoboard(new Pawn(true, j + 48));
+                else
+                    addpeacetoboard(new Pawn(true, j + 40));
             }
             //create all of the knights
             addpeacetoboard(new Knight(false, 1)); addpeacetoboard(new Knight(false, 6));
@@ -127,10 +130,10 @@ namespace chess
             addpeacetoboard(new Rook(true, 56)); addpeacetoboard(new Rook(true, 63));
 
             //create all of the queens
-            addpeacetoboard(new Queen(false, 3)); addpeacetoboard(new Queen(true, 59));
+            addpeacetoboard(new Queen(false, 4)); addpeacetoboard(new Queen(true, 60));
 
             //create all of the kings
-            addpeacetoboard(new King(false, 4)); addpeacetoboard(new King(true, 60));
+            addpeacetoboard(new King(false, 3)); addpeacetoboard(new King(true, 59));
             
         }
 

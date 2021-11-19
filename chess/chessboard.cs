@@ -111,11 +111,18 @@ namespace chess
             //create all of the pawns
             for (int j = 0; j < 8; j++) 
             {
-                addpeacetoboard(new Pawn(false, j + 8));
-                if(j !=3)
+                
+                if(j != 3)
+                {
+                    addpeacetoboard(new Pawn(false, j + 8));
                     addpeacetoboard(new Pawn(true, j + 48));
+                }
+
                 else
+                {
+                    addpeacetoboard(new Pawn(false, j + 16));
                     addpeacetoboard(new Pawn(true, j + 40));
+                }
             }
             //create all of the knights
             addpeacetoboard(new Knight(false, 1)); addpeacetoboard(new Knight(false, 6));

@@ -25,6 +25,14 @@ namespace chess
             {
                 c.manualy_makemove(move);
                 Console.WriteLine(c.ToString());
+                List<Move> moves2 = m.generate_moves();
+
+                foreach (Move move2 in moves2)
+                {
+                    c.manualy_makemove(move2);
+                    Console.WriteLine(c.ToString());
+                    c.unmakemove();
+                }
                 c.unmakemove();
             }
 

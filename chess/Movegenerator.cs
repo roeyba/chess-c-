@@ -53,9 +53,7 @@ namespace chess
                 */
                 //not done yet
             }
-
-
-
+            
             if (this.c.whitetomove)
             {
                 foreach (Peace peace in parts[Peace.Pawn])//Peace.Knight
@@ -71,9 +69,9 @@ namespace chess
                 }
             }
 
-            foreach (Peace peace in parts[Peace.Rook])
+            foreach (Peace peace in parts[Peace.Knight])
             {
-                getmoves_sliding_pc(peace, moves);
+                getmoves_knight_pc(peace, moves);
             }
 
             foreach (Peace peace in parts[Peace.Bishop])
@@ -81,12 +79,17 @@ namespace chess
                 getmoves_diagonal_pc(peace, moves);
             }
 
+            foreach (Peace peace in parts[Peace.Rook])
+            {
+                getmoves_sliding_pc(peace, moves);
+            }
+
             foreach (Peace peace in parts[Peace.Queen])
             {
                 getmoves_sliding_pc(peace, moves);
                 getmoves_diagonal_pc(peace, moves);
             }
-
+            
 
             //check whose turn it is to play
             //go over all of the peaces of the curren player and for each peace add its moves to the "moves" list
@@ -97,7 +100,7 @@ namespace chess
 
             return moves;
         }
-        public List<Move> getmoves_sliding_pc(Peace peace, List<Move> moves)
+        public void getmoves_sliding_pc(Peace peace, List<Move> moves)
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
@@ -162,11 +165,9 @@ namespace chess
                     break;
                 }
             }
-
-            return moves;
         }
         
-        public List<Move> getmoves_diagonal_pc(Peace peace, List<Move> moves)
+        public void getmoves_diagonal_pc(Peace peace, List<Move> moves)
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
@@ -230,10 +231,9 @@ namespace chess
                     break;
                 }
             }
-            return moves;
         }
 
-        public List<Move> getmoves_w_pawn_pc(Peace peace, List<Move> moves)
+        public void getmoves_w_pawn_pc(Peace peace, List<Move> moves)
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
@@ -270,10 +270,9 @@ namespace chess
                 }
                 this.c.moves.Push(lastmove);
             }
-            return moves;
         }
 
-        public List<Move> getmoves_b_pawn_pc(Peace peace, List<Move> moves) //this one is done - the second one shoud be more ifishent
+        public void getmoves_b_pawn_pc(Peace peace, List<Move> moves) //this one is done - the second one shoud be more ifishent
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
@@ -310,7 +309,43 @@ namespace chess
                 }
                 this.c.moves.Push(lastmove);
             }
-            return moves;
+        }
+
+        public void getmoves_knight_pc(Peace peace, List<Move> moves)
+        {
+            int i = peace.get_i_pos();
+            int j = peace.get_j_pos();
+            Boolean rightest = (j==7);
+            int first = 2;
+            int second = 1;
+            for (int numplace = 0; numplace < 2; numplace++)
+            {
+                for (int firstnumsighn = 0; firstnumsighn < 2; firstnumsighn++)
+                {
+                    for (int secondnumsighn = 0; secondnumsighn < 2; secondnumsighn++)
+                    {
+                        int tmpi = i + first;
+                        int tmpj = j + second;
+                        if (tmpi < 0 || tmpi > chessboard.board_size - 1 || tmpj < 0 || tmpj > chessboard.board_size - 1 || (c.board[tmpi, tmpj].isocupied() && c.board[tmpi, tmpj].Peace.iswhite == peace.iswhite) )
+                        {//the knight moves out of the board boundaries or land on a peace of its own color
+                            second *= -1;
+                            continue;
+                        }
+                        moves.Add(new Move(peace.position, (tmpi) * 8 + tmpj));
+                        second *= -1;
+                    }
+                    first *= -1;
+                }
+                first  = 1;
+                second = 2;
+            }
+        }
+
+        public void getmoves_king_pc(Peace peace, List<Move> moves)
+        {
+            //normal movement
+            //castle both sides
+            //making sure all movement of all the peaces are safe for the king.
         }
     }
 }

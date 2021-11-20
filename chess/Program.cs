@@ -16,25 +16,38 @@ namespace chess
 
             Console.ForegroundColor = ConsoleColor.Red;
             chessboard c = new chessboard();
+            Console.WriteLine("start position");
             Console.WriteLine(c.ToString());
 
             Movegenerator m = new Movegenerator(c);
             List<Move> moves = m.generate_moves();
-            
+            int count = 0;
             foreach (Move move in moves)
             {
                 c.manualy_makemove(move);
                 Console.WriteLine(c.ToString());
                 List<Move> moves2 = m.generate_moves();
-
+                
                 foreach (Move move2 in moves2)
                 {
                     c.manualy_makemove(move2);
                     Console.WriteLine(c.ToString());
+                    /*
+                    List<Move> moves3 = m.generate_moves();
+
+                    foreach (Move move3 in moves3)
+                    {
+                        c.manualy_makemove(move3);
+                        Console.WriteLine(c.ToString());
+                        count++;
+                        c.unmakemove();
+                    }*/
+
                     c.unmakemove();
                 }
                 c.unmakemove();
             }
+            Console.WriteLine(count);
 
             /*
             Move one = new Move(48, 8);
@@ -45,6 +58,7 @@ namespace chess
             
             c.unmakemove(); c.unmakemove();
             */
+            Console.WriteLine("end position");
             Console.WriteLine(c.ToStringfromlist());
 
             stopwatch.Stop(); Console.WriteLine("Elapsed Time is {0} seconds", (float)stopwatch.ElapsedMilliseconds/1000);

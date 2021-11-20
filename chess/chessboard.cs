@@ -34,7 +34,7 @@ namespace chess
         public Tile[,] board = new Tile[board_size, board_size]; // 8x8 board that represent the chess board
         public Stack<Move> moves = new Stack<Move>(40); // in an average chess game there are 40 moves
 
-        public Boolean whitetomove = true;// true is white and false is black
+        public Boolean whitetomove = false;// true is white and false is black
 
         /*   (i)matrix representations
          *      +---+---+---+---+---+---+---+---+
@@ -111,41 +111,36 @@ namespace chess
             //create all of the pawns
             for (int j = 0; j < 8; j++) 
             {
-                
-                if(j != 3)
+                addpeacetoboardandlist(new Pawn(false, j + 8));
+                if (j == 3)
                 {
-                    addpeacetoboard(new Pawn(false, j + 8));
-                    addpeacetoboard(new Pawn(true, j + 48));
+                    addpeacetoboardandlist(new Pawn(true, j + 24));
                 }
-
                 else
-                {
-                    addpeacetoboard(new Pawn(false, j + 16));
-                    addpeacetoboard(new Pawn(true, j + 40));
-                }
+                    addpeacetoboardandlist(new Pawn(true, j + 48));
             }
             //create all of the knights
-            addpeacetoboard(new Knight(false, 1)); addpeacetoboard(new Knight(false, 6));
-            addpeacetoboard(new Knight(true, 57)); addpeacetoboard(new Knight(true, 62));
+            addpeacetoboardandlist(new Knight(false, 1)); addpeacetoboardandlist(new Knight(false, 6));
+            addpeacetoboardandlist(new Knight(true, 57)); addpeacetoboardandlist(new Knight(true, 62));
 
             //create all of the bishops
-            addpeacetoboard(new Bishop(false, 2)); addpeacetoboard(new Bishop(false, 5));
-            addpeacetoboard(new Bishop(true, 58)); addpeacetoboard(new Bishop(true, 61));
+            addpeacetoboardandlist(new Bishop(false, 2)); addpeacetoboardandlist(new Bishop(false, 5));
+            addpeacetoboardandlist(new Bishop(true, 58)); addpeacetoboardandlist(new Bishop(true, 61));
 
             //create all of the rooks
-            addpeacetoboard(new Rook(false, 0)); addpeacetoboard(new Rook(false, 7));
-            addpeacetoboard(new Rook(true, 56)); addpeacetoboard(new Rook(true, 63));
+            addpeacetoboardandlist(new Rook(false, 0)); addpeacetoboardandlist(new Rook(false, 7));
+            addpeacetoboardandlist(new Rook(true, 56)); addpeacetoboardandlist(new Rook(true, 63));
 
             //create all of the queens
-            addpeacetoboard(new Queen(false, 4)); addpeacetoboard(new Queen(true, 60));
+            addpeacetoboardandlist(new Queen(false, 4)); addpeacetoboardandlist(new Queen(true, 60));
 
             //create all of the kings
-            addpeacetoboard(new King(false, 3)); addpeacetoboard(new King(true, 59));
+            addpeacetoboardandlist(new King(false, 3)); addpeacetoboardandlist(new King(true, 59));
             
         }
 
         //add peace in a unocupied Tile
-        private void addpeacetoboard(Peace peace) 
+        private void addpeacetoboardandlist(Peace peace) 
         {
             board[peace.get_i_pos(), peace.get_j_pos()].Peace = peace;
             if (peace.iswhite)
@@ -153,7 +148,13 @@ namespace chess
             else
                 this.black_parts[peace.type].Add(peace);
         }
-
+        private void removepeacefromlist(Peace peace)
+        {
+            if (peace.iswhite)
+                this.white_parts[peace.type].Remove(peace);
+            else
+                this.black_parts[peace.type].Remove(peace);
+        }
 
         //takes a move - no matter whose turn to play it is!!!!
         //no matter if there is a peace from the same color in it!!!!
@@ -171,28 +172,19 @@ namespace chess
             if (this.board[iendpo, jendpo].isocupied())
             {
                 move.capturedpeace = this.board[iendpo, jendpo].Peace; //save the captured peace
-                //Console.WriteLine(move.capturedpeace.ToString()+"\n");
-                //remove the captured peace from list
-                //Console.WriteLine(ToStringfromlist() +"\n");
-                if (move.capturedpeace.iswhite)
-                    this.white_parts[move.capturedpeace.type].Remove(move.capturedpeace);
-                else
-                    this.black_parts[move.capturedpeace.type].Remove(move.capturedpeace);
-                //Console.WriteLine(ToStringfromlist());
+                removepeacefromlist(move.capturedpeace);
             }
-            else
+            else if (this.board[istartpo, jstartpo].Peace.type == Peace.Pawn && jstartpo != jendpo) // if a pawn moves diagonaly    // En passant movement!
             {
-                
-
-                //make a pawn special move possible!!
+                move.capturedpeace = this.board[istartpo, jendpo].Peace; //save the captured pawn
+                removepeacefromlist(move.capturedpeace);
+                this.board[istartpo, jendpo].Peace = null;//the captured peace squer isnt ocupied anymore
             }
-            //Console.WriteLine(this.ToString());
+
             //change board representation
             this.board[iendpo, jendpo].Peace = this.board[istartpo, jstartpo].Peace; // change the position of the mover in the board
             this.board[iendpo, jendpo].Peace.position = move.endsquare;//change the position of the mover in the list
             this.board[istartpo, jstartpo].Peace = null;//the current squer isnt ocupied
-            //Console.WriteLine(this.ToString());
-            //Console.WriteLine(ToStringfromlist());
             
             moves.Push(move);
             switchplayerturn();
@@ -236,9 +228,9 @@ namespace chess
             //
 
             
-            //move the peace position back in list
+            //move the peace position value back
             this.board[iendpo, jendpo].Peace.position = move.startsquare;
-            //move the peace position back in bord
+            //move the peace position back in the board
             this.board[istartpo, jstartpo].Peace = this.board[iendpo, jendpo].Peace;//the start squer is now ocupied
             
             //
@@ -250,16 +242,16 @@ namespace chess
                 //Console.WriteLine(move.capturedpeace.ToString()+"\n");
 
                 //add the captured peace in the board
-                this.board[iendpo, jendpo].Peace = move.capturedpeace;
+                this.board[move.capturedpeace.get_i_pos(), move.capturedpeace.get_j_pos()].Peace = move.capturedpeace;
+
+                if(move.endsquare != move.capturedpeace.position) // if its a En passant move
+                    this.board[iendpo, jendpo].Peace = null;//the end squer isnt ocupied anymore
 
                 //add the captured peace in the list
                 if (move.capturedpeace.iswhite)
                     this.white_parts[move.capturedpeace.type].Add(move.capturedpeace);
                 else
                     this.black_parts[move.capturedpeace.type].Add(move.capturedpeace);
-
-                //Console.WriteLine(ToString());
-                //Console.WriteLine(ToStringfromlist());
             }
             else
             {
@@ -361,11 +353,11 @@ namespace chess
 
         
         //gets i/j index for the board matrix representation from a one number position
-        public int get_i_pos(int position)
+        public static int get_i_pos(int position)
         {//return the i value of the peace/move the board matrix
             return position / 8;
         }
-        public int get_j_pos(int position)
+        public static int get_j_pos(int position)
         {//return the i value of the peace/move the board matrix
             return position % 8;
         }

@@ -33,7 +33,7 @@ namespace chess
         public List<Peace>[] black_parts = new List<Peace>[peaces_types_amount]; // | 0pawns | 1knights | 2bishops | 3rooks | 4queens | 5king
         public Tile[,] board = new Tile[board_size, board_size]; // 8x8 board that represent the chess board
         public Stack<Move> moves = new Stack<Move>(40); // in an average chess game there are 40 moves
-
+        public Boolean[] can_castle = { true, true, true , true, true, true }; // thite all, white left , white right, black all , black left , black right
         public Boolean whitetomove = false;// true is white and false is black
 
         /*   (i)matrix representations
@@ -112,7 +112,7 @@ namespace chess
             for (int j = 0; j < 8; j++) 
             {
                 addpeacetoboardandlist(new Pawn(false, j + 8));
-                if (j == 3)
+                if (j == 4)
                 {
                     addpeacetoboardandlist(new Pawn(true, j + 24));
                 }
@@ -132,10 +132,10 @@ namespace chess
             addpeacetoboardandlist(new Rook(true, 56)); addpeacetoboardandlist(new Rook(true, 63));
 
             //create all of the queens
-            addpeacetoboardandlist(new Queen(false, 4)); addpeacetoboardandlist(new Queen(true, 60));
+            addpeacetoboardandlist(new Queen(false, 3)); addpeacetoboardandlist(new Queen(true, 59));
 
             //create all of the kings
-            addpeacetoboardandlist(new King(false, 3)); addpeacetoboardandlist(new King(true, 59));
+            addpeacetoboardandlist(new King(false, 4)); addpeacetoboardandlist(new King(true, 60));
             
         }
 
@@ -151,11 +151,14 @@ namespace chess
         private void removepeacefromlist(Peace peace)
         {
             if (peace.iswhite)
+            {
                 this.white_parts[peace.type].Remove(peace);
-            else
-                this.black_parts[peace.type].Remove(peace);
+                return;
+            }
+            this.black_parts[peace.type].Remove(peace);
         }
 
+        //take a move - not matter if the move eats a peace of the same color of the eater
         //takes a move - no matter whose turn to play it is!!!!
         //no matter if there is a peace from the same color in it!!!!
         //not chacking if the peace than need to move exist!!!
@@ -174,22 +177,62 @@ namespace chess
                 move.capturedpeace = this.board[iendpo, jendpo].Peace; //save the captured peace
                 removepeacefromlist(move.capturedpeace);
             }
-            else if (this.board[istartpo, jstartpo].Peace.type == Peace.Pawn && jstartpo != jendpo) // if a pawn moves diagonaly    // En passant movement!
-            {
+            else if (this.board[istartpo, jstartpo].Peace.type == Peace.Pawn && jstartpo != jendpo) // if a pawn moves diagonaly
+            {// En passant movement!
                 move.capturedpeace = this.board[istartpo, jendpo].Peace; //save the captured pawn
                 removepeacefromlist(move.capturedpeace);
                 this.board[istartpo, jendpo].Peace = null;//the captured peace squer isnt ocupied anymore
             }
-
+            else if (this.board[istartpo, jstartpo].Peace.type == Peace.King && Math.Abs(jstartpo - jendpo) != 1) // if a castle movement
+            { //the king moves more than one square in one move
+                int row = 0;
+                if (this.board[istartpo, jstartpo].Peace.iswhite)
+                    row = 7;
+                if(move.endsquare ==62)//right castle
+                {//changing the position of the right rook
+                    this.board[row, 5].Peace = this.board[row, 7].Peace;
+                    this.board[row, 5].Peace.position = row * chessboard.board_size+5;
+                    this.board[row, 7].Peace = null;
+                }
+                if(move.endsquare ==58)//left castle
+                {//changing the position of the left rook
+                    this.board[row, 3].Peace = this.board[row, 0].Peace;
+                    this.board[row, 3].Peace.position = row * chessboard.board_size+3;
+                    this.board[row, 0].Peace = null;
+                }
+            }
             //change board representation
             this.board[iendpo, jendpo].Peace = this.board[istartpo, jstartpo].Peace; // change the position of the mover in the board
             this.board[iendpo, jendpo].Peace.position = move.endsquare;//change the position of the mover in the list
             this.board[istartpo, jstartpo].Peace = null;//the current squer isnt ocupied
-            
+
+            change_castling_rights(this.board[iendpo, jendpo].Peace, false, jstartpo);
+
             moves.Push(move);
             switchplayerturn();
         }
-
+        //changing the castling rights according to the peace than moved and its position and if you make move or unmaking it
+        //start posiotion refers to the place the peace was before you make/unmake the move!!!
+        public void change_castling_rights(Peace peace, Boolean unmakemove, int jstartpo)
+        {
+            int offset = 3;
+            if (peace.iswhite)
+            {
+                offset = 0;
+            }
+            if (this.can_castle[offset])
+            {
+                if (peace.type == Peace.Rook) //if rook moved
+                {
+                    if (jstartpo == 0) //left rook
+                        this.can_castle[offset + 1] = unmakemove;
+                    if (jstartpo == 7) //right rook
+                        this.can_castle[offset + 2] = unmakemove;
+                }
+                else if (peace.type == Peace.King) //if king moved
+                    this.can_castle[offset] = unmakemove;
+            }
+        }
 
         public void humam_makemove(Move move)
         {
@@ -237,9 +280,6 @@ namespace chess
             //
             if(move.capturedpeace != null) //if a peace needs to come back
             {
-                //Console.WriteLine(ToStringfromlist());
-                //Console.WriteLine(ToString());
-                //Console.WriteLine(move.capturedpeace.ToString()+"\n");
 
                 //add the captured peace in the board
                 this.board[move.capturedpeace.get_i_pos(), move.capturedpeace.get_j_pos()].Peace = move.capturedpeace;
@@ -255,6 +295,24 @@ namespace chess
             }
             else
             {
+                if (this.board[istartpo, jstartpo].Peace.type == Peace.King && Math.Abs(jstartpo - jendpo) != 1) // if a castle movement
+                { //the king moves more than one square in one move
+                    int row = 0;
+                    if (this.board[istartpo, jstartpo].Peace.iswhite)
+                        row = 7;
+                    if (move.endsquare == 62)//right castle
+                    {//changing the position of the right rook
+                        this.board[row, 7].Peace = this.board[row, 5].Peace;
+                        this.board[row, 7].Peace.position = row * chessboard.board_size + 5;
+                        this.board[row, 5].Peace = null;
+                    }
+                    if (move.endsquare == 58)//left castle
+                    {//changing the position of the left rook
+                        this.board[row, 0].Peace = this.board[row, 3].Peace;
+                        this.board[row, 0].Peace.position = row * chessboard.board_size + 3;
+                        this.board[row, 3].Peace = null;
+                    }
+                }
                 this.board[iendpo, jendpo].Peace = null;//the end squer isnt ocupied
             }
             switchplayerturn();  
@@ -364,32 +422,3 @@ namespace chess
 
     }
 }
-//gets a chessboard object and coping it to new chessboard object - not finished!!
-/*public chessboard(chessboard cb)
-{
-    initialize_matrix_and_lists();
-
-    for (int i = 0; i < peaces_types_amount; i++)
-    {
-        for (int j = 0; j < cb.white_parts[i].Count; j++) //white peaces
-        {
-            this.white_parts[i].Add(new Peace(cb.white_parts[i][j]));
-        }
-        for (int j = 0; j < cb.black_parts[i].Count; j++) //black peaces
-        {
-            this.black_parts[i].Add(new Peace(cb.black_parts[i][j]));
-        }
-    }
-}*/
-
-
-//gets the list of the current players turn
-/*
- * public List<Peace>[] getplayerlistpointer(bool currentplayerlist)
-        {
-            if (this.whitetomove && currentplayerlist || !this.whitetomove && !currentplayerlist)
-                return white_parts;
-            else
-                return this.black_parts;
-        }
-*/

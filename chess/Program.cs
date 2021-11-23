@@ -13,7 +13,7 @@ namespace chess
         static void Main(string[] args)
         {
             Stopwatch stopwatch = new Stopwatch(); stopwatch.Start();
-
+            //Console.WriteLine(true +1);
             Console.ForegroundColor = ConsoleColor.Red;
             chessboard c = new chessboard();
             Console.WriteLine("start position");

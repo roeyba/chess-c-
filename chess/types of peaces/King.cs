@@ -8,11 +8,8 @@ namespace chess.types_of_peaces
 {
     class King : Peace
     {
-        public Boolean can_custle;
-
         public King(bool iswhitee, int position) : base(iswhitee, position)
         {
-            this.can_custle = true;
             this.type = 5;
         }
     }

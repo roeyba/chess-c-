@@ -1,4 +1,5 @@
-﻿using System;
+﻿using chess.types_of_peaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,6 +35,7 @@ namespace chess
 
         //generates all the legal moves that exist in this chess board position
         // all the generated moves return ass a list that contain move objects
+        //making sure all movement of all the peaces are safe for the king.!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         public List<Move> generate_moves()
         {
             List<Move> moves = new List<Move>();
@@ -89,7 +91,10 @@ namespace chess
                 getmoves_sliding_pc(peace, moves);
                 getmoves_diagonal_pc(peace, moves);
             }
-            
+            foreach (Peace peace in parts[Peace.King])
+            {
+                Getmoves_king_pc(peace, moves);
+            }
 
             //check whose turn it is to play
             //go over all of the peaces of the curren player and for each peace add its moves to the "moves" list
@@ -340,12 +345,62 @@ namespace chess
                 second = 2;
             }
         }
-
-        public void getmoves_king_pc(Peace peace, List<Move> moves)
+        
+        private void Getmoves_king_pc(Peace peace, List<Move> moves)
         {
-            //normal movement
-            //castle both sides
-            //making sure all movement of all the peaces are safe for the king.
+            int row = 0;
+            if (peace.iswhite)
+                row = 3;
+            if (c.can_castle[row])//castle both sides
+            {
+                if (c.can_castle[row + 1])//left
+                {
+                    if (! c.board[7, 1].isocupied() && ! c.board[7, 2].isocupied() && ! c.board[7, 3].isocupied())
+                        moves.Add(new Move(peace.position, 58));
+                }
+                if (c.can_castle[row + 2])//right
+                {
+                    if (!c.board[7, 5].isocupied() && !c.board[7, 6].isocupied())
+                        moves.Add(new Move(peace.position, 62));
+                }
+            }//normal movement
+            int i = peace.get_i_pos();
+            int j = peace.get_j_pos();
+            Boolean[] borders = { j != 0, i != 7, j != 7, i != 0 };// 0left, 1down, 2right, 3up
+
+            //same raw as starting posiotion
+            if (borders[2] && ! c.board[i, j + 1].isocupied())
+                moves.Add(new Move(peace.position, i * 8 + j + 1));
+            if (borders[0] && ! c.board[i, j - 1].isocupied())
+                moves.Add(new Move(peace.position, i * 8 + j - 1));
+            //
+
+            //raw down to the starting posiotion
+            i++;
+            if (borders[1])
+            {
+                if (borders[0] && ! c.board[i, j - 1].isocupied())
+                    moves.Add(new Move(peace.position, i * 8 + j - 1));
+                if (! c.board[i, j].isocupied())
+                    moves.Add(new Move(peace.position, i * 8 + j));
+                if (borders[2] && ! c.board[i, j + 1].isocupied())
+                    moves.Add(new Move(peace.position, i * 8 + j + 1));
+            }
+            //
+
+            //raw up to the starting posiotion
+            i -= 2;
+            if (borders[3])
+            {
+                if (borders[0] && ! c.board[i, j - 1].isocupied())
+                    moves.Add(new Move(peace.position, i * 8 + j - 1));
+                if (! c.board[i, j].isocupied())
+                    moves.Add(new Move(peace.position, i * 8 + j));
+                if (borders[2] && ! c.board[i, j + 1].isocupied())
+                    moves.Add(new Move(peace.position, i * 8 + j + 1));
+            }
+            //
         }
+
     }
 }

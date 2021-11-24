@@ -23,10 +23,28 @@ namespace chess
             capturedpeace = null;
         }
     }
+    /*
+     -Check en passant:
 
+    // En passant captures are a tricky special case. Because they are rather
+    // uncommon, we do it simply by testing whether the king is attacked after
+    // the move is made.
+
+    -Do you want move your king?
+
+    // If the moving piece is a king, check whether the destination
+    // square is attacked by the opponent. Castling moves are checked
+    // for legality during move generation.
+
+    -You can make the move if it's not pinned. Or it's pinned, but it still protects the king.
+
+    // A non-king move is legal if and only if it is not pinned or it
+    // is moving along the ray towards or away from the king.
+    */
     public class Movegenerator
     {
         public chessboard c;
+        public long WA = 0L, WP = 0L, BA = 0L, BP = 0L; //white attacking squares, white pinned peaces  //the rest is the same for black
 
         public Movegenerator(chessboard chess)
         {
@@ -35,7 +53,6 @@ namespace chess
 
         //generates all the legal moves that exist in this chess board position
         // all the generated moves return ass a list that contain move objects
-        //making sure all movement of all the peaces are safe for the king.!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         public List<Move> generate_moves()
         {
             List<Move> moves = new List<Move>();
@@ -53,10 +70,10 @@ namespace chess
                 if(!this.c.board[i, t].isocupied())
                 moves.Add(new Move());
                 */
-                //not done yet
-            }
-            
-            if (this.c.whitetomove)
+    //not done yet
+}
+
+if (this.c.whitetomove)
             {
                 foreach (Peace peace in parts[Peace.Pawn])//Peace.Knight
                 {
@@ -242,20 +259,30 @@ namespace chess
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
-            if(!c.board[i - 1, j].isocupied()) //one step forwords
+            int jfinal = 15;
+            int ifinal = 15;
+            int istart = 15;
+            Peace lastmovepeace;
+            if (this.c.moves.Count != 0)
+            {// En passant movement data
+                Move lastmove = this.c.moves.Peek();
+                jfinal = chessboard.get_j_pos(lastmove.endsquare);
+                ifinal = chessboard.get_i_pos(lastmove.endsquare);
+                istart = chessboard.get_i_pos(lastmove.startsquare);
+            }
+            if (!c.board[i - 1, j].isocupied()) //one step forwords
             {
                 moves.Add(new Move(peace.position, (i - 1) * 8 + j));
                 if (i == 6 && !c.board[i - 2, j].isocupied())//two steps forwords
                     moves.Add(new Move(peace.position, (i - 2) * 8 + j));
             }
-            if (this.c.moves.Count != 0)
+            if (j != chessboard.board_size - 1)//not at the edge right of the board
             {
-                Move lastmove = this.c.moves.Pop();
-                int jfinal = chessboard.get_j_pos(lastmove.endsquare);
-                int ifinal = chessboard.get_i_pos(lastmove.endsquare);
-                int istart = chessboard.get_i_pos(lastmove.startsquare);
-                Peace lastmovepeace;
-                if (j != chessboard.board_size - 1 && c.board[i, j + 1].isocupied())
+                if (c.board[i - 1, j + 1].isocupied())//normal capture right
+                {
+                    moves.Add(new Move(peace.position, (i - 1) * 8 + j+1));
+                }
+                else if (jfinal != 15 && c.board[i, j + 1].isocupied() && !c.board[i - 1, j + 1].isocupied())
                 {
                     lastmovepeace = c.board[i, j + 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && false == lastmovepeace.iswhite)// En passant right
@@ -264,7 +291,14 @@ namespace chess
                             moves.Add(new Move(peace.position, (i - 1) * 8 + j + 1));
                     }
                 }
-                if (j != 0 && c.board[i, j - 1].isocupied())
+            }
+            if (j != 0)//not at the edge left of the board
+            {
+                if (c.board[i - 1, j - 1].isocupied())//normal capture left
+                {
+                    moves.Add(new Move(peace.position, (i - 1) * 8 + j - 1));
+                }
+                else if (jfinal != 15 && c.board[i, j - 1].isocupied() && !c.board[i - 1, j - 1].isocupied())
                 {
                     lastmovepeace = c.board[i, j - 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && false == lastmovepeace.iswhite)// En passant left
@@ -273,7 +307,6 @@ namespace chess
                             moves.Add(new Move(peace.position, (i - 1) * 8 + j - 1));
                     }
                 }
-                this.c.moves.Push(lastmove);
             }
         }
 
@@ -281,29 +314,30 @@ namespace chess
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
+            int jfinal = 15;
+            int ifinal = 15;
+            int istart = 15;
+            Peace lastmovepeace;
+            if (this.c.moves.Count != 0)
+            {// En passant movement data
+                Move lastmove = this.c.moves.Peek();
+                jfinal = chessboard.get_j_pos(lastmove.endsquare);
+                ifinal = chessboard.get_i_pos(lastmove.endsquare);
+                istart = chessboard.get_i_pos(lastmove.startsquare);
+            }
             if (!c.board[i + 1, j].isocupied()) //one step forwords
             {
                 moves.Add(new Move(peace.position, (i + 1) * 8 + j));
                 if (i == 1 && !c.board[i + 2, j].isocupied())//two steps forwords
                     moves.Add(new Move(peace.position, (i + 2) * 8 + j));
             }
-            if (this.c.moves.Count != 0)
+            if (j != 0)//not at the edge left of the board
             {
-                Move lastmove = this.c.moves.Pop();
-                int jfinal = chessboard.get_j_pos(lastmove.endsquare);
-                int ifinal = chessboard.get_i_pos(lastmove.endsquare);
-                int istart = chessboard.get_i_pos(lastmove.startsquare);
-                Peace lastmovepeace;
-                if (j != chessboard.board_size-1 && c.board[i, j + 1].isocupied())
+                if (c.board[i + 1, j - 1].isocupied())//normal capture left
                 {
-                    lastmovepeace = c.board[i, j + 1].Peace;
-                    if (Peace.Pawn == lastmovepeace.type && true == lastmovepeace.iswhite)// En passant right
-                    {
-                        if (jfinal == j + 1 && ifinal == i && istart == i - 2)
-                            moves.Add(new Move(peace.position, (i - 1) * 8 + j + 1));
-                    }
+                    moves.Add(new Move(peace.position, (i + 1) * 8 + j - 1));
                 }
-                if (j != 0 && c.board[i, j - 1].isocupied())
+                else if (jfinal != 15 && c.board[i, j - 1].isocupied() && !c.board[i + 1, j - 1].isocupied())
                 {
                     lastmovepeace = c.board[i, j - 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && true == lastmovepeace.iswhite)// En passant left
@@ -312,7 +346,22 @@ namespace chess
                             moves.Add(new Move(peace.position, (i - 1) * 8 + j - 1));
                     }
                 }
-                this.c.moves.Push(lastmove);
+            }
+            if (j != chessboard.board_size - 1) //not at the edge right of the board
+            {
+                if (c.board[i + 1, j + 1].isocupied())//normal capture right
+                {
+                    moves.Add(new Move(peace.position, (i + 1) * 8 + j + 1));
+                }
+                else if (jfinal != 15 && c.board[i, j + 1].isocupied() && !c.board[i + 1, j + 1].isocupied())
+                {
+                    lastmovepeace = c.board[i, j + 1].Peace;
+                    if (Peace.Pawn == lastmovepeace.type && true == lastmovepeace.iswhite)// En passant right
+                    {
+                        if (jfinal == j + 1 && ifinal == i && istart == i - 2)
+                            moves.Add(new Move(peace.position, (i - 1) * 8 + j + 1));
+                    }
+                }
             }
         }
 
@@ -403,4 +452,5 @@ namespace chess
         }
 
     }
+
 }

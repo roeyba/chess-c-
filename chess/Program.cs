@@ -15,23 +15,22 @@ namespace chess
             Stopwatch stopwatch = new Stopwatch(); stopwatch.Start();
             //Console.WriteLine(true +1);
             Console.ForegroundColor = ConsoleColor.Red;
-            chessboard c = new chessboard();
+            chessboard board = new chessboard();
             Console.WriteLine("start position");
-            Console.WriteLine(c.ToString());
+            Console.WriteLine(board.ToString());
 
-            Movegenerator m = new Movegenerator(c);
-            List<Move> moves = m.generate_moves();
+            List<Move> moves = board.generator.generate_moves();
             int count = 0;
             foreach (Move move in moves)
             {
-                c.manualy_makemove(move);
-                Console.WriteLine(c.ToString());
-                List<Move> moves2 = m.generate_moves();
+                board.manualy_makemove(move);
+                Console.WriteLine(board.ToString());
+                List<Move> moves2 = board.generator.generate_moves();
                 
                 foreach (Move move2 in moves2)
                 {
-                    c.manualy_makemove(move2);
-                    Console.WriteLine(c.ToString());
+                    board.manualy_makemove(move2);
+                    Console.WriteLine(board.ToString());
                     /*
                     List<Move> moves3 = m.generate_moves();
 
@@ -43,9 +42,9 @@ namespace chess
                         c.unmakemove();
                     }*/
 
-                    c.unmakemove();
+                    board.unmakemove();
                 }
-                c.unmakemove();
+                board.unmakemove();
             }
             Console.WriteLine(count);
 
@@ -59,7 +58,7 @@ namespace chess
             c.unmakemove(); c.unmakemove();
             */
             Console.WriteLine("end position");
-            Console.WriteLine(c.ToStringfromlist());
+            Console.WriteLine(board.ToStringfromlist());
 
             stopwatch.Stop(); Console.WriteLine("Elapsed Time is {0} seconds", (float)stopwatch.ElapsedMilliseconds/1000);
             Console.ReadLine();

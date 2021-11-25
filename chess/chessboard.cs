@@ -35,6 +35,7 @@ namespace chess
         public Stack<Move> moves = new Stack<Move>(40); // in an average chess game there are 40 moves
         public Boolean[] can_castle = { true, true, true , true, true, true }; // thite all, white left , white right, black all , black left , black right
         public Boolean whitetomove = false;// true is white and false is black
+        public Movegenerator generator;
 
         /*   (i)matrix representations
          *      +---+---+---+---+---+---+---+---+
@@ -101,6 +102,9 @@ namespace chess
             // in a chess game every side can only have 8 pawns
             this.white_parts[0].Capacity = 8;
             this.black_parts[0].Capacity = 8;
+
+            //create the move generator
+            generator = new Movegenerator(this);
         }
 
         //create an empty chess board and initialize it to beggining chess position 
@@ -111,13 +115,16 @@ namespace chess
             //create all of the pawns
             for (int j = 0; j < 8; j++) 
             {
-                addpeacetoboardandlist(new Pawn(false, j + 8));
+                
                 if (j == 4)
                 {
-                    addpeacetoboardandlist(new Pawn(true, j + 24));
+                    addpeacetoboardandlist(new Pawn(true, j + 8));
                 }
                 else
+                {
+                    addpeacetoboardandlist(new Pawn(false, j + 8));
                     addpeacetoboardandlist(new Pawn(true, j + 48));
+                }
             }
             //create all of the knights
             addpeacetoboardandlist(new Knight(false, 1)); addpeacetoboardandlist(new Knight(false, 6));
@@ -157,13 +164,22 @@ namespace chess
             }
             this.black_parts[peace.type].Remove(peace);
         }
+        private void addpeacetolist(Peace peace)
+        {
+            if (peace.iswhite)
+            {
+                this.white_parts[peace.type].Add(peace);
+                return;
+            }
+            this.black_parts[peace.type].Add(peace);
+        }
 
         //take a move - not matter if the move eats a peace of the same color of the eater
         //takes a move - no matter whose turn to play it is!!!!
         //no matter if there is a peace from the same color in it!!!!
         //not chacking if the peace than need to move exist!!!
         //not cheking if the move is legal
-        public void manualy_makemove(Move move)
+        public void manualy_makemove(Move move) //make sure if its last move of the pawn that it is correct
         {
             int istartpo = get_i_pos(move.startsquare);
             int jstartpo = get_j_pos(move.startsquare);
@@ -171,7 +187,6 @@ namespace chess
             int iendpo = get_i_pos(move.endsquare);
             int jendpo = get_j_pos(move.endsquare);
             //
-            
             if (this.board[iendpo, jendpo].isocupied())
             {
                 move.capturedpeace = this.board[iendpo, jendpo].Peace; //save the captured peace
@@ -208,9 +223,18 @@ namespace chess
 
             change_castling_rights(this.board[iendpo, jendpo].Peace, false, jstartpo);
 
+            //if a pawn does promotion
+            if (move.edgecase > 0 && move.edgecase <= 4)
+            {
+                removepeacefromlist(this.board[iendpo, jendpo].Peace);
+                this.board[iendpo, jendpo].Peace.type = move.edgecase;
+                addpeacetolist(this.board[iendpo, jendpo].Peace);
+            }
+
             moves.Push(move);
             switchplayerturn();
         }
+        
         //changing the castling rights according to the peace than moved and its position and if you make move or unmaking it
         //start posiotion refers to the place the peace was before you make/unmake the move!!!
         public void change_castling_rights(Peace peace, Boolean unmakemove, int jstartpo)
@@ -269,16 +293,21 @@ namespace chess
             int iendpo = get_i_pos(move.endsquare);
             int jendpo = get_j_pos(move.endsquare);
             //
-
-            
             //move the peace position value back
             this.board[iendpo, jendpo].Peace.position = move.startsquare;
             //move the peace position back in the board
             this.board[istartpo, jstartpo].Peace = this.board[iendpo, jendpo].Peace;//the start squer is now ocupied
-            
+
+            //if pawn promoted
+            if (move.edgecase > 0 && move.edgecase <= 4)
+            {
+                removepeacefromlist(this.board[istartpo, jstartpo].Peace);
+                this.board[istartpo, jstartpo].Peace.type = Peace.Pawn;
+                addpeacetolist(this.board[istartpo, jstartpo].Peace);
+            }
             //
             //
-            if(move.capturedpeace != null) //if a peace needs to come back
+            if (move.capturedpeace != null) //if a peace needs to come back
             {
 
                 //add the captured peace in the board

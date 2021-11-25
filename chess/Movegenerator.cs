@@ -14,13 +14,23 @@ namespace chess
         public readonly int startsquare;
         public readonly int endsquare;
         public Peace capturedpeace;
+        public int edgecase;
+        /*edge case to number:
+         *1 - pawn promote to knight
+         *2 - pawn promote to bishop
+         *3 - pawn promote to rook
+         *4 - pawn promote to queen
+         *
+         *
+        */
 
         // the user create new move, when making the move its cheked if it is a ligal move and if so 'capturedpeace' is added if necesary
-        public Move(int startsquare, int endsquare)
+        public Move(int startsquare, int endsquare, int edgecase_num=0)
         {
             this.startsquare = startsquare;
             this.endsquare = endsquare;
             capturedpeace = null;
+            this.edgecase = edgecase_num;
         }
     }
     /*
@@ -43,8 +53,9 @@ namespace chess
     */
     public class Movegenerator
     {
-        public chessboard c;
-        public long WA = 0L, WP = 0L, BA = 0L, BP = 0L; //white attacking squares, white pinned peaces  //the rest is the same for black
+        private chessboard c;
+        //public long WA = 0L, WP = 0L, BA = 0L, BP = 0L; //white attacking squares, white pinned peaces  //the rest is the same for black
+        private int promotion = 1;
 
         public Movegenerator(chessboard chess)
         {
@@ -57,34 +68,25 @@ namespace chess
         {
             List<Move> moves = new List<Move>();
             List<Peace>[] parts;
+            //check whose turn it is to play
             if (this.c.whitetomove)
                 parts = c.white_parts;
             else
                 parts = c.black_parts;
 
-            foreach (Peace peace in parts[Peace.Knight])
-            {
-                /*
-                int i = peace.get_i_pos();
-                int j = peace.get_j_pos();
-                if(!this.c.board[i, t].isocupied())
-                moves.Add(new Move());
-                */
-    //not done yet
-}
-
-if (this.c.whitetomove)
+            //go over all of the peaces of the curren player and for each peace add its moves to the "moves" list
+            if (this.c.whitetomove)
             {
                 foreach (Peace peace in parts[Peace.Pawn])//Peace.Knight
                 {
-                    getmoves_w_pawn_pc(peace,moves);
+                    moves.AddRange(getmoves_w_pawn_pc(peace));
                 }
             }
             else
             {
                 foreach (Peace peace in parts[Peace.Pawn])
                 {
-                    getmoves_b_pawn_pc(peace, moves);
+                    moves.AddRange(getmoves_b_pawn_pc(peace));
                 }
             }
 
@@ -100,12 +102,12 @@ if (this.c.whitetomove)
 
             foreach (Peace peace in parts[Peace.Rook])
             {
-                getmoves_sliding_pc(peace, moves);
+                getmoves_verticle_pc(peace, moves);
             }
 
             foreach (Peace peace in parts[Peace.Queen])
             {
-                getmoves_sliding_pc(peace, moves);
+                getmoves_verticle_pc(peace, moves);
                 getmoves_diagonal_pc(peace, moves);
             }
             foreach (Peace peace in parts[Peace.King])
@@ -113,16 +115,15 @@ if (this.c.whitetomove)
                 Getmoves_king_pc(peace, moves);
             }
 
-            //check whose turn it is to play
-            //go over all of the peaces of the curren player and for each peace add its moves to the "moves" list
-            //go over all of the peaces and delete the moves where the curent player peaces are interfiting with the move
+            
             //delete the moves that cause the curent player king to be in check
 
 
 
             return moves;
         }
-        public void getmoves_sliding_pc(Peace peace, List<Move> moves)
+        
+        public void getmoves_verticle_pc(Peace peace, List<Move> moves)
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
@@ -255,8 +256,9 @@ if (this.c.whitetomove)
             }
         }
 
-        public void getmoves_w_pawn_pc(Peace peace, List<Move> moves)
+        public List<Move> getmoves_w_pawn_pc(Peace peace)
         {
+            List<Move> moves = new List<Move>();
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
             int jfinal = 15;
@@ -273,7 +275,7 @@ if (this.c.whitetomove)
             if (!c.board[i - 1, j].isocupied()) //one step forwords
             {
                 moves.Add(new Move(peace.position, (i - 1) * 8 + j));
-                if (i == 6 && !c.board[i - 2, j].isocupied())//two steps forwords
+                if (i == 6 && !c.board[i - 2, j].isocupied())         //two steps forwords
                     moves.Add(new Move(peace.position, (i - 2) * 8 + j));
             }
             if (j != chessboard.board_size - 1)//not at the edge right of the board
@@ -282,7 +284,7 @@ if (this.c.whitetomove)
                 {
                     moves.Add(new Move(peace.position, (i - 1) * 8 + j+1));
                 }
-                else if (jfinal != 15 && c.board[i, j + 1].isocupied() && !c.board[i - 1, j + 1].isocupied())
+                else if (jfinal != 15 && c.board[i, j + 1].isocupied())
                 {
                     lastmovepeace = c.board[i, j + 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && false == lastmovepeace.iswhite)// En passant right
@@ -298,7 +300,7 @@ if (this.c.whitetomove)
                 {
                     moves.Add(new Move(peace.position, (i - 1) * 8 + j - 1));
                 }
-                else if (jfinal != 15 && c.board[i, j - 1].isocupied() && !c.board[i - 1, j - 1].isocupied())
+                else if (jfinal != 15 && c.board[i, j - 1].isocupied())
                 {
                     lastmovepeace = c.board[i, j - 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && false == lastmovepeace.iswhite)// En passant left
@@ -308,10 +310,25 @@ if (this.c.whitetomove)
                     }
                 }
             }
+            if (i == 1)
+            {
+                List<Move> final_moves = new List<Move>(3);
+                foreach (Move move in moves)
+                {
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, 1)); //knight
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, 2)); //bishop
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, 3)); //rook
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, 4)); //queen
+                }
+                return final_moves;
+            }
+            else
+                return moves;
         }
 
-        public void getmoves_b_pawn_pc(Peace peace, List<Move> moves) //this one is done - the second one shoud be more ifishent
+        public List<Move> getmoves_b_pawn_pc(Peace peace) //this one is done - the second one shoud be more ifishent
         {
+            List<Move> moves = new List<Move>();
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
             int jfinal = 15;
@@ -337,7 +354,7 @@ if (this.c.whitetomove)
                 {
                     moves.Add(new Move(peace.position, (i + 1) * 8 + j - 1));
                 }
-                else if (jfinal != 15 && c.board[i, j - 1].isocupied() && !c.board[i + 1, j - 1].isocupied())
+                else if (jfinal != 15 && c.board[i, j - 1].isocupied())
                 {
                     lastmovepeace = c.board[i, j - 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && true == lastmovepeace.iswhite)// En passant left
@@ -353,7 +370,7 @@ if (this.c.whitetomove)
                 {
                     moves.Add(new Move(peace.position, (i + 1) * 8 + j + 1));
                 }
-                else if (jfinal != 15 && c.board[i, j + 1].isocupied() && !c.board[i + 1, j + 1].isocupied())
+                else if (jfinal != 15 && c.board[i, j + 1].isocupied())
                 {
                     lastmovepeace = c.board[i, j + 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && true == lastmovepeace.iswhite)// En passant right
@@ -363,6 +380,20 @@ if (this.c.whitetomove)
                     }
                 }
             }
+            if (i == 6)
+            {
+                List<Move> final_moves = new List<Move>(3);
+                foreach (Move move in moves)
+                {
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, 1)); //knight
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, 2)); //bishop
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, 3)); //rook
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, 4)); //queen
+                }
+                return final_moves;
+            }
+            else
+                return moves;
         }
 
         public void getmoves_knight_pc(Peace peace, List<Move> moves)
@@ -394,8 +425,8 @@ if (this.c.whitetomove)
                 second = 2;
             }
         }
-        
-        private void Getmoves_king_pc(Peace peace, List<Move> moves)
+
+        public void Getmoves_king_pc(Peace peace, List<Move> moves)
         {
             int row = 0;
             if (peace.iswhite)
@@ -450,6 +481,8 @@ if (this.c.whitetomove)
             }
             //
         }
+
+        
 
     }
 

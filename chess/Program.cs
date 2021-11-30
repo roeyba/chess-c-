@@ -12,56 +12,56 @@ namespace chess
     {
         static void Main(string[] args)
         {
-            Stopwatch stopwatch = new Stopwatch(); stopwatch.Start();
-            //Console.WriteLine(true +1);
             Console.ForegroundColor = ConsoleColor.Red;
-            chessboard board = new chessboard();
+            Stopwatch stopwatch = new Stopwatch(); stopwatch.Start();
+            //Program p = new Program();
+            //p.event_handler();
+
+            //chessboard board = new chessboard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/2KR3R b kq - ");
+            chessboard board = new chessboard("1kr5/ppn4P/8/8/8/8/PP1P4/1KR5 w -");
             Console.WriteLine("start position");
             Console.WriteLine(board.ToString());
 
-            List<Move> moves = board.generator.generate_moves();
-            int count = 0;
-            foreach (Move move in moves)
-            {
-                board.manualy_makemove(move);
-                Console.WriteLine(board.ToString());
-                List<Move> moves2 = board.generator.generate_moves();
-                
-                foreach (Move move2 in moves2)
-                {
-                    board.manualy_makemove(move2);
-                    Console.WriteLine(board.ToString());
-                    /*
-                    List<Move> moves3 = m.generate_moves();
+            int nodes = board.generator.Perfit(6);
+            Console.WriteLine(nodes+" leaf nodes");
 
-                    foreach (Move move3 in moves3)
-                    {
-                        c.manualy_makemove(move3);
-                        Console.WriteLine(c.ToString());
-                        count++;
-                        c.unmakemove();
-                    }*/
-
-                    board.unmakemove();
-                }
-                board.unmakemove();
-            }
-            Console.WriteLine(count);
-
-            /*
-            Move one = new Move(48, 8);
-            Move two = new Move(49, 9);
-            c.manualy_makemove(one);
-            c.manualy_makemove(two);
-            Console.WriteLine(c.ToStringfromlist());
-            
-            c.unmakemove(); c.unmakemove();
-            */
             Console.WriteLine("end position");
             Console.WriteLine(board.ToStringfromlist());
 
+
             stopwatch.Stop(); Console.WriteLine("Elapsed Time is {0} seconds", (float)stopwatch.ElapsedMilliseconds/1000);
             Console.ReadLine();
+        }
+        private void event_handler()
+        {
+            chessboard board = new chessboard();
+            string input = Console.ReadLine();
+            while (!input.Equals("done"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                switch (input)
+                {
+                    case "d":
+                        Console.WriteLine(board.ToString());
+                        break;
+                    case string s when s.StartsWith("go perft"):
+                        int num = Int32.Parse(input.Substring(9));
+                        Console.WriteLine(board.generator.Perfit(num));
+                        break;
+                    case string s when s.StartsWith("position fen"):
+                        input.Remove(0, 13);
+                        board = new chessboard(input);
+                        break;
+                    case "":
+                        Console.WriteLine();
+                        break;
+                    default:
+                        Console.WriteLine("unknown command: " + input);
+                        break;
+                }
+                Console.ForegroundColor = ConsoleColor.White;
+                input = Console.ReadLine();
+            }
         }
     }
 }

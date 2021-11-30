@@ -25,11 +25,11 @@ namespace chess
             this.position = position;
         }
 
-        public Peace(Peace p)
+        public Peace(bool iswhite, int position, int type)
         {
-            this.type = p.type;
-            this.iswhite = p.iswhite;
-            this.position = p.position;
+            this.type = type;
+            this.iswhite = iswhite;
+            this.position = position;
         }
 
         //return string representation of all of the info about the peace

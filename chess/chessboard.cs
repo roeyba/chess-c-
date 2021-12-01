@@ -148,16 +148,6 @@ namespace chess
             {
                 addpeacetoboardandlist(new Pawn(false, j + 8));
                 addpeacetoboardandlist(new Pawn(true, j + 48));
-                /*
-                if (j == 4)
-                {
-                    addpeacetoboardandlist(new Pawn(true, j + 8));
-                }
-                else
-                {
-                    addpeacetoboardandlist(new Pawn(false, j + 8));
-                    addpeacetoboardandlist(new Pawn(true, j + 48));
-                }*/
             }
             //create all of the knights
             addpeacetoboardandlist(new Knight(false, 1)); addpeacetoboardandlist(new Knight(false, 6));
@@ -185,6 +175,15 @@ namespace chess
             int i = 0;
             int j = 0;
             int counter = 0;
+            var dic = new Dictionary<char, int>()
+                            {
+                                {'p' , Peace.Pawn} ,
+                                {'n' , Peace.Knight} ,
+                                {'b' , Peace.Bishop} ,
+                                {'r' , Peace.Rook} ,
+                                {'q' , Peace.Queen} ,
+                                {'k' , Peace.King}
+                            };
             foreach (char character in FEN_notation)
             {
                 int num= (int)Char.GetNumericValue(character);
@@ -204,15 +203,6 @@ namespace chess
                             counter++;
                             goto LoopEnd;
                         default:
-                            var dic = new Dictionary<char, int>()
-                            {
-                                {'p' , Peace.Pawn} ,
-                                {'n' , Peace.Knight} ,
-                                {'b' , Peace.Bishop} ,
-                                {'r' , Peace.Rook} ,
-                                {'q' , Peace.Queen} ,
-                                {'k' , Peace.King}
-                            };
                             int peacetype = dic[Char.ToLower(character)];
                             if (Char.IsUpper(character))//if white peace
                                 addpeacetoboardandlist(new Peace(true,i*8+j , peacetype));
@@ -224,6 +214,7 @@ namespace chess
                 }
                 counter++;
             }
+            
             LoopEnd:
             if (Char.ToLower(FEN_notation[counter++]) == 'w')
                 this.whiteturn = true;
@@ -257,17 +248,54 @@ namespace chess
                     break;
             }
             //En passant target square ,Halfmove Clock and Fullmove counter are ignored;
-
         }
 
+        public string get_fen_notation()
+        {
+            string fen = "";
+            int counter = 0;
+            for (int i = 0; i < board_size; i++)
+            {
+                for (int j = 0; j < board_size; j++)
+                {
+                    if (board[i, j].isocupied())
+                    {
+                        if(counter != 0)
+                            fen += counter.ToString();
+                        counter = 0;
+                        fen += board[i, j].Peace.get_type_char_rep();
+                    }
+                    else
+                    {
+                        counter++;
+                        if(j == board_size-1)
+                            fen += counter.ToString();
+                    }
+                }
+                fen += "/";
+                counter = 0;
+            }
+            if(this.whiteturn)
+                fen += " w ";
+            else
+                fen += " b ";
+            if(! this.can_castle[0] && ! this.can_castle[3])
+                fen += "- ";
+            else
+            {
+                if (this.can_castle[2]) fen += "K";
+                if (this.can_castle[1]) fen += "Q";
+                if (this.can_castle[5]) fen += "k";
+                if (this.can_castle[4]) fen += "q";
+            }
+            fen += " ";
+            return fen;
+        }
         //add peace in a unocupied Tile
         private void addpeacetoboardandlist(Peace peace) 
         {
             board[peace.get_i_pos(), peace.get_j_pos()].Peace = peace;
-            if (peace.iswhite)
-                this.white_parts[peace.type].Add(peace);
-            else
-                this.black_parts[peace.type].Add(peace);
+            addpeacetolist(peace);
         }
         private void removepeacefromlist(Peace peace)
         {
@@ -334,11 +362,12 @@ namespace chess
             this.board[iendpo, jendpo].Peace = this.board[istartpo, jstartpo].Peace; // change the position of the mover in the board
             this.board[iendpo, jendpo].Peace.position = move.endsquare;//change the position of the mover in the list
             this.board[istartpo, jstartpo].Peace = null;//the current squer isnt ocupied
-
-            if(move.edgecase ==0) move.edgecase = change_castling_rights(this.board[iendpo, jendpo].Peace, jstartpo);
-            else change_castling_rights(this.board[iendpo, jendpo].Peace, jstartpo);
+            if(move.edgecase ==0) 
+                move.edgecase = change_castling_rights(this.board[iendpo, jendpo].Peace, jstartpo);
+            else 
+                change_castling_rights(this.board[iendpo, jendpo].Peace, jstartpo);
             
-            Console.WriteLine(this.ToString());
+
             //if a pawn does promotion
             if (move.edgecase > 0 && move.edgecase <= 4)
             {
@@ -346,7 +375,6 @@ namespace chess
                 this.board[iendpo, jendpo].Peace.type = move.edgecase;
                 addpeacetolist(this.board[iendpo, jendpo].Peace);
             }
-            Console.WriteLine(this.ToString());
             moves.Push(move);
             switchplayerturn();
         }
@@ -392,15 +420,17 @@ namespace chess
             {
                 offset = 0;
             }
-            if(move.edgecase == Move.king_moved)//king can now castle
+            bool castle_left = (move.edgecase == Move.castle_left);
+            bool castle_right = (move.edgecase == Move.castle_right);
+            if (move.edgecase == Move.king_moved || castle_right || castle_left)//king can now castle
             {
                 this.can_castle[offset] = true;
             }
-            else if (move.edgecase == Move.left_rook_moved)//left rook can now castle
+            else if (move.edgecase == Move.left_rook_moved || castle_left)//left rook can now castle
             {
                 this.can_castle[offset+1] = true;
             }
-            else if (move.edgecase == Move.right_rook_moved)//right rook can now castle
+            else if (move.edgecase == Move.right_rook_moved || castle_right)//right rook can now castle
             {
                 this.can_castle[offset + 2] = true;
             }
@@ -421,7 +451,6 @@ namespace chess
             this.board[iendpo, jendpo].Peace.position = move.startsquare;
             //move the peace position back in the board
             this.board[istartpo, jstartpo].Peace = this.board[iendpo, jendpo].Peace;//the start squer is now ocupied
-
             //if pawn promoted
             if (move.edgecase > 0 && move.edgecase <= 4)
             {
@@ -466,9 +495,9 @@ namespace chess
                         this.board[row, 0].Peace.position = row * chessboard.board_size;
                         this.board[row, 3].Peace = null;
                     }
-                } 
+                }
             }
-            switchplayerturn();  
+            switchplayerturn();
         }
 
         //switch the boolean value indicates which player turn it is to play
@@ -508,7 +537,7 @@ namespace chess
             tmp += "     0   1   2   3   4   5   6   7  \n";
             if (!tmp.Equals(ToStringfromlist()))
             {
-                Console.WriteLine("the list and board arent syncronised");
+                Console.WriteLine("the list and board arent syncronised!");
                 Console.WriteLine(tmp);
                 Console.WriteLine(ToStringfromlist());
             }

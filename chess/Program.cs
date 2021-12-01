@@ -18,11 +18,11 @@ namespace chess
             //p.event_handler();
 
             //chessboard board = new chessboard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/2KR3R b kq - ");
-            chessboard board = new chessboard("1kr5/ppn4P/8/8/8/8/PP1P4/1KR5 w -");
+            chessboard board = new chessboard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq ");
             Console.WriteLine("start position");
             Console.WriteLine(board.ToString());
 
-            int nodes = board.generator.Perfit(6);
+            int nodes = board.generator.Perfit(3);
             Console.WriteLine(nodes+" leaf nodes");
 
             Console.WriteLine("end position");

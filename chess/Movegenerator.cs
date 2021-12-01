@@ -76,7 +76,7 @@ namespace chess
 
         public Movegenerator(chessboard chess)
         {
-            c = chess;
+            this.c = chess;
         }
 
         //generates all the legal moves that exist in this chess board position
@@ -318,7 +318,7 @@ namespace chess
             }
             if (i == 1)
             {
-                List<Move> final_moves = new List<Move>(3);
+                List<Move> final_moves = new List<Move>(4);
                 foreach (Move move in moves)
                 {
                     final_moves.Add(new Move(move.startsquare, move.endsquare, Move.pawn_promote_to_knight)); //knight
@@ -388,13 +388,13 @@ namespace chess
             }
             if (i == 6)
             {
-                List<Move> final_moves = new List<Move>(3);
+                List<Move> final_moves = new List<Move>(4);
                 foreach (Move move in moves)
                 {
-                    final_moves.Add(new Move(move.startsquare, move.endsquare, 1)); //knight
-                    final_moves.Add(new Move(move.startsquare, move.endsquare, 2)); //bishop
-                    final_moves.Add(new Move(move.startsquare, move.endsquare, 3)); //rook
-                    final_moves.Add(new Move(move.startsquare, move.endsquare, 4)); //queen
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, Move.pawn_promote_to_knight)); //knight
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, Move.pawn_promote_to_bishop)); //bishop
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, Move.pawn_promote_to_rook)); //rook
+                    final_moves.Add(new Move(move.startsquare, move.endsquare, Move.pawn_promote_to_queen)); //queen
                 }
                 return final_moves;
             }
@@ -445,12 +445,12 @@ namespace chess
                 if (c.can_castle[row + 1])//left
                 {
                     if (!c.board[i, 1].isocupied() && !c.board[i, 2].isocupied() && !c.board[i, 3].isocupied())
-                        moves.Add(new Move(peace.position, peace.position-2, 6));
+                        moves.Add(new Move(peace.position, peace.position-2, Move.castle_left));
                 }
                 if (c.can_castle[row + 2])//right
                 {
                     if (!c.board[i, 5].isocupied() && !c.board[i, 6].isocupied())
-                        moves.Add(new Move(peace.position, peace.position+2, 5));
+                        moves.Add(new Move(peace.position, peace.position+2, Move.castle_right));
                 }
             }
             //normal movement from here:
@@ -506,13 +506,12 @@ namespace chess
             foreach (Move move in moves)
             {
                 c.manualy_makemove(move);
-                Console.WriteLine(c.ToString());
                 int num = Perfit(depth - 1, headnode);
                 leafnodes += num;
                 if (depth == headnode)
                     Console.WriteLine("[" + chessboard.get_j_pos_as_letter(move.startsquare) + "," + Math.Abs(chessboard.get_i_pos(move.startsquare) - 8) + "]" + "[" + chessboard.get_j_pos_as_letter(move.endsquare) + "," + Math.Abs(chessboard.get_i_pos(move.endsquare) - 8) + "]" + ": " + num);
                 c.unmakelastmove();
-                Console.WriteLine(c.ToString());
+                //Console.WriteLine(this.c.ToString());
             }
             return leafnodes;
         }
@@ -523,12 +522,7 @@ namespace chess
             List<Move> legalmoves = new List<Move>();
             foreach (Move tmpmove in pseudolegalmoves)
             {
-                c.manualy_makemove(tmpmove);/*
-                for (int i = 0; i < 6; i++)
-                {
-                    if (c.can_castle[i] == false)
-                        Console.WriteLine("ff");
-                }*/
+                c.manualy_makemove(tmpmove);
                 int initial_king_pos; //where the king is before moving at all
                 int king_pos;
                 if (this.c.whiteturn)

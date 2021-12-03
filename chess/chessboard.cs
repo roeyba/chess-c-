@@ -43,7 +43,7 @@ namespace chess
         public List<Peace>[] black_parts = new List<Peace>[peaces_types_amount]; // | 0pawns | 1knights | 2bishops | 3rooks | 4queens | 5king
         public Tile[,] board = new Tile[board_size, board_size]; // 8x8 board that represent the chess board
         public Stack<Move> moves = new Stack<Move>(40); // in an average chess game there are 40 moves
-        public Boolean[] can_castle = { true, true, true , true, true, true }; // white all, white left , white right, black all , black left , black right
+        public Boolean[] can_castle = { true, true, true , true, true, true }; // white all, white left , white right, black all , black left , black right, ||before got eaten: white left, white right, black left , black right                               
         public Boolean whiteturn = true;// true is white and false is black
         public Movegenerator generator;
 
@@ -272,23 +272,29 @@ namespace chess
                             fen += counter.ToString();
                     }
                 }
-                fen += "/";
+                if(i!= board_size-1)
+                    fen += "/";
                 counter = 0;
             }
             if(this.whiteturn)
                 fen += " w ";
             else
                 fen += " b ";
-            if(! this.can_castle[0] && ! this.can_castle[3])
+            if(!this.can_castle[1] && !this.can_castle[2] && !this.can_castle[4] && !this.can_castle[5])
                 fen += "- ";
             else
             {
-                if (this.can_castle[2]) fen += "K";
-                if (this.can_castle[1]) fen += "Q";
-                if (this.can_castle[5]) fen += "k";
-                if (this.can_castle[4]) fen += "q";
+                if (this.can_castle[0])
+                {
+                    if (this.can_castle[2]) fen += "K";
+                    if (this.can_castle[1]) fen += "Q";
+                }
+                if (this.can_castle[3])
+                {
+                    if (this.can_castle[5]) fen += "k";
+                    if (this.can_castle[4]) fen += "q";
+                }
             }
-            fen += " ";
             return fen;
         }
         //add peace in a unocupied Tile
@@ -329,30 +335,70 @@ namespace chess
             int iendpo = get_i_pos(move.endsquare);
             int jendpo = get_j_pos(move.endsquare);
             //
-            if (this.board[iendpo, jendpo].isocupied())
+            if (this.board[iendpo, jendpo].isocupied()) //if there is a cptured peace in this move
             {
                 move.capturedpeace = this.board[iendpo, jendpo].Peace; //save the captured peace
                 removepeacefromlist(move.capturedpeace);
+
+                if (move.capturedpeace.type == Peace.Rook)
+                {// what happen if rook gets eaten - you have to change the castling rights
+                    int offset = getoffset(move.capturedpeace.iswhite);
+                    if (this.can_castle[offset])//if king hasnt moved
+                    {
+                        int row;
+                        if (move.capturedpeace.iswhite)
+                        {
+                            row = 7;
+                        }
+                        else
+                        {
+                            row = 0;
+                        }
+                        if (iendpo == row)//if the eaten rook is the one that can castle
+                        {
+                            //debug issue in fen :r3k2r/Pppp1ppp/1b3nbN/nPP5/BB2P3/q4N2/P2P2PP/r2Q1RK1 w kq - 0 1
+                            //this is why the row value got in, otherwise the board think white eat his left side rook and now he cant castle that side.
+                            if (jendpo == 0 && this.can_castle[offset + 1])//eating the left rook that can castle
+                            {
+                                this.can_castle[offset + 1] = false; // the right rook moved (cant caslte anymore)
+                                move.capturedpeace.position -= 64; //mark for the unmakemove func
+                            }
+                            else if (jendpo == 7 && this.can_castle[offset + 2]) //eating the right rook that can castle
+                            { //right rook
+                                this.can_castle[offset + 2] = false;// the left rook moved (cant caslte anymore)
+                                move.capturedpeace.position -= 64;//mark for the unmakemove func
+                            }
+                        }
+                    }
+                }
             }
-            else if (this.board[istartpo, jstartpo].Peace.type == Peace.Pawn && jstartpo != jendpo) // if a pawn moves diagonaly
-            {// En passant movement!
+            else if (move.edgecase == Move.enpassant) // if a En passant movement
+            {
                 move.capturedpeace = this.board[istartpo, jendpo].Peace; //save the captured pawn
                 removepeacefromlist(move.capturedpeace);
                 this.board[istartpo, jendpo].Peace = null;//the captured peace squer isnt ocupied anymore
             }
-            else if (this.board[istartpo, jstartpo].Peace.type == Peace.King && Math.Abs(jstartpo - jendpo) != 1) // if a castle movement
+            else if (move.edgecase == Move.castle) // if a castle movement
             { //the king moves more than one square in one move
                 int row = 0;
                 if (this.board[istartpo, jstartpo].Peace.iswhite)
                     row = 7;
-                if(move.endsquare ==row*8+6)//right castle
+                if(move.endsquare == move.startsquare +2)//right castle
                 {//changing the position of the right rook
+                    if (this.board[row, 7].Peace == null)
+                    {
+                        this.printstatics();
+                    }
                     this.board[row, 5].Peace = this.board[row, 7].Peace;
                     this.board[row, 5].Peace.position = row * chessboard.board_size+5;
                     this.board[row, 7].Peace = null;
                 }
-                if(move.endsquare == row * 8 + 2)//left castle
+                else if(move.endsquare == move.startsquare - 2)//left castle
                 {//changing the position of the left rook
+                    if (this.board[row, 0].Peace == null)
+                    {
+                        this.printstatics();
+                    }
                     this.board[row, 3].Peace = this.board[row, 0].Peace;
                     this.board[row, 3].Peace.position = row * chessboard.board_size+3;
                     this.board[row, 0].Peace = null;
@@ -362,12 +408,9 @@ namespace chess
             this.board[iendpo, jendpo].Peace = this.board[istartpo, jstartpo].Peace; // change the position of the mover in the board
             this.board[iendpo, jendpo].Peace.position = move.endsquare;//change the position of the mover in the list
             this.board[istartpo, jstartpo].Peace = null;//the current squer isnt ocupied
-            if(move.edgecase ==0) 
-                move.edgecase = change_castling_rights(this.board[iendpo, jendpo].Peace, jstartpo);
-            else 
-                change_castling_rights(this.board[iendpo, jendpo].Peace, jstartpo);
             
-
+            change_castling_rights(this.board[iendpo, jendpo].Peace.iswhite,move.edgecase, jstartpo);
+            
             //if a pawn does promotion
             if (move.edgecase > 0 && move.edgecase <= 4)
             {
@@ -382,57 +425,49 @@ namespace chess
         //changing the castling rights according to the peace than moved and its position and if you make move or unmaking it
         //start position refers to the place the peace was before you make the move!!!
         //return edgecase number for a move
-        public int change_castling_rights(Peace peace, int jstartpo)
+        public void change_castling_rights(bool iswhite, int edgecase, int jstartpo)
         {
-            int offset = 3;
-            if (peace.iswhite)
+            if (kingdidntmoved(iswhite) && edgecase !=0)
             {
-                offset = 0;
-            }
-            if (this.can_castle[offset])
-            {
-                if (peace.type == Peace.Rook) //if rook moved
+                int offset = getoffset(iswhite);
+                if (edgecase == Move.rook_moving)
                 {
-                    if (this.can_castle[offset+1] && jstartpo == 0)
+                    if (jstartpo == 0)//left rook moved, cant castle at left side anymove
                     { //left rook
                         this.can_castle[offset + 1] = false;
-                        return Move.left_rook_moved;//left rook moved, cant castle at left side anymove
                     }
-                    if (this.can_castle[offset + 2] && jstartpo == 7)
+                    else //(jstartpo == 7) //right rook moved, cant castle at right side anymove
                     { //right rook
                         this.can_castle[offset + 2] = false;
-                        return Move.right_rook_moved;//right rook moved, cant castle at right side anymove
                     }
                 }
-                else if (peace.type == Peace.King)
-                { //if king moved
+                else if (edgecase == Move.king_moving || edgecase == Move.castle)//king moved, cant castle any more
+                { //if king moved or castled:
                     this.can_castle[offset] = false;
-                    return Move.king_moved; //king moved, cant castle any more
                 }
             }// white all, white left , white right, black all , black left , black right
-            return 0;
         }
         
-        public void unmake_castling_rights(Move move, Boolean iswhite)
+        public void unmake_castling_rights(int edgecase, Boolean iswhite, int jstartpo)
         {
-            int offset = 3;
-            if (iswhite)
+            if (edgecase != 0)
             {
-                offset = 0;
-            }
-            bool castle_left = (move.edgecase == Move.castle_left);
-            bool castle_right = (move.edgecase == Move.castle_right);
-            if (move.edgecase == Move.king_moved || castle_right || castle_left)//king can now castle
-            {
-                this.can_castle[offset] = true;
-            }
-            else if (move.edgecase == Move.left_rook_moved || castle_left)//left rook can now castle
-            {
-                this.can_castle[offset+1] = true;
-            }
-            else if (move.edgecase == Move.right_rook_moved || castle_right)//right rook can now castle
-            {
-                this.can_castle[offset + 2] = true;
+                int offset = getoffset(iswhite);
+                if (edgecase == Move.king_moving || edgecase == Move.castle)//king can now castle
+                {
+                    this.can_castle[offset] = true;
+                }
+                else if (edgecase == Move.rook_moving)//left rook can now castle
+                {
+                    if (jstartpo == 0)//left rook moved, can castle at left side
+                    { //left rook
+                        this.can_castle[offset + 1] = true;
+                    }
+                    else //(jstartpo == 7) //right rook moved, ca castle at right side
+                    { //right rook
+                        this.can_castle[offset + 2] = true;
+                    }
+                }
             }
         }
         
@@ -440,19 +475,36 @@ namespace chess
         public void unmakelastmove()
         {
             Move move = this.moves.Pop();
+
             int istartpo = get_i_pos(move.startsquare);
             int jstartpo = get_j_pos(move.startsquare);
             //
             int iendpo = get_i_pos(move.endsquare);
             int jendpo = get_j_pos(move.endsquare);
+
+            bool peace_got_captured = move.capturedpeace != null;
+            if (peace_got_captured && move.capturedpeace.position <0)//rook got eaten and could castle before that
+            {// if rook got eaten - you have to change the castling rights
+                move.capturedpeace.position += 64;
+                int offset = getoffset(move.capturedpeace.iswhite);
+                if (jendpo == 0)//eating the left rook
+                {
+                    this.can_castle[offset + 1] = true; 
+                }
+                else if (jendpo == 7) //eating the right rook
+                { //right rook
+                    this.can_castle[offset + 2] = true;
+                }
+                
+            }
             //
-            unmake_castling_rights(move, this.board[iendpo, jendpo].Peace.iswhite);
+            unmake_castling_rights(move.edgecase, this.board[iendpo, jendpo].Peace.iswhite, jstartpo);
             //move the peace position value back
             this.board[iendpo, jendpo].Peace.position = move.startsquare;
             //move the peace position back in the board
             this.board[istartpo, jstartpo].Peace = this.board[iendpo, jendpo].Peace;//the start squer is now ocupied
             //if pawn promoted
-            if (move.edgecase > 0 && move.edgecase <= 4)
+            if (move.peacepromote())
             {
                 removepeacefromlist(this.board[istartpo, jstartpo].Peace);
                 this.board[istartpo, jstartpo].Peace.type = Peace.Pawn;
@@ -460,7 +512,7 @@ namespace chess
             }
             //
             //
-            if (move.capturedpeace != null) //if a peace needs to come back
+            if (peace_got_captured) //if a peace needs to come back
             {
 
                 //add the captured peace in the board
@@ -478,18 +530,18 @@ namespace chess
             else
             {
                 this.board[iendpo, jendpo].Peace = null;//the end squer isnt ocupied
-                if (this.board[istartpo, jstartpo].Peace.type == Peace.King && Math.Abs(jstartpo - jendpo) != 1) // if a castle movement
+                if (move.edgecase == Move.castle) // if a castle movement
                 { //the king moves more than one square in one move
                     int row = 0;
                     if (this.board[istartpo, jstartpo].Peace.iswhite)
                         row = 7;
-                    if (move.endsquare == row * 8 + 6)//right castle
+                    if (move.endsquare == move.startsquare +2)//right castle
                     {//changing the position of the right rook
                         this.board[row, 7].Peace = this.board[row, 5].Peace;
                         this.board[row, 7].Peace.position = row * chessboard.board_size+7;
                         this.board[row, 5].Peace = null;
                     }
-                    if (move.endsquare == row * 8 + 2)//left castle
+                    if (move.endsquare == move.startsquare - 2)//left castle
                     {//changing the position of the left rook
                         this.board[row, 0].Peace = this.board[row, 3].Peace;
                         this.board[row, 0].Peace.position = row * chessboard.board_size;
@@ -498,6 +550,36 @@ namespace chess
                 }
             }
             switchplayerturn();
+        }
+        
+        public void manualy_makemove(string four_letters_position, int edgecase)
+        {// example: "a1a2"
+            //this function works acording to the real notation in a real chess game:
+            /*
+               +---+---+---+---+---+---+---+---+
+               | r |   |   |   | k |   |   | r | 8
+               +---+---+---+---+---+---+---+---+
+               | p |   | p | p | q | p | b |   | 7
+               +---+---+---+---+---+---+---+---+
+               | b | n |   |   | p | n | p |   | 6
+               +---+---+---+---+---+---+---+---+
+               |   |   |   | P | N |   |   |   | 5
+               +---+---+---+---+---+---+---+---+
+               |   | p |   |   | P |   |   |   | 4
+               +---+---+---+---+---+---+---+---+
+               |   |   | N |   |   | Q |   | p | 3
+               +---+---+---+---+---+---+---+---+
+               | P | P | P | B | B | P | P | P | 2
+               +---+---+---+---+---+---+---+---+
+               | R |   |   |   | K |   |   | R | 1
+               +---+---+---+---+---+---+---+---+
+                 a   b   c   d   e   f   g   h 
+            */
+            int init_i = Math.Abs(four_letters_position[1] - '0' - 8);
+            int init_j = char.ToUpper(four_letters_position[0]) - 65;
+            int final_i = Math.Abs(four_letters_position[3] - '0' - 8);
+            int final_j = char.ToUpper(four_letters_position[2]) - 65;
+            manualy_makemove(new Move(init_i * 8 + init_j, final_i * 8 + final_j, edgecase));
         }
 
         //switch the boolean value indicates which player turn it is to play
@@ -604,8 +686,47 @@ namespace chess
             return tmp;
         }
 
-        
-        //gets i/j index for the board matrix representation from a one number position
+        public string get_all_moves(bool withlines =true)
+        {
+            string movesst = "";
+            Stack<Move> tmpmoves = new Stack<Move>();
+            while (this.moves.Count != 0)
+            {
+                tmpmoves.Push(this.moves.Pop());
+            }
+            while (tmpmoves.Count != 0)
+            {
+                Move move = tmpmoves.Pop();
+                movesst += move.Tostring();
+                if (withlines)
+                    movesst += "\n";
+                this.moves.Push(move);
+            }
+            return movesst;
+        }
+
+        public void printstatics()
+        {
+            Console.WriteLine(this.ToString());
+            Console.WriteLine(this.get_fen_notation());
+            Console.WriteLine(this.get_all_moves());
+        }
+
+        public bool kingdidntmoved(bool iswhite)
+        {// check if the king of that peace didnt move from there position once.
+            if (iswhite)
+            {
+                return this.can_castle[0];
+            }
+            return this.can_castle[3];
+        }
+        public int getoffset(bool iswhite)
+        {
+            if (iswhite)
+                return 0;
+            return 3;
+        }
+        //gets i/j index for the board matrix representation from a one number position 
         public static int get_i_pos(int position)
         {//return the i value of the peace/move the board matrix
             return position / 8;

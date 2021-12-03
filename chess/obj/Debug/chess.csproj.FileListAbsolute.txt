@@ -26,3 +26,24 @@ C:\Users\roey2\OneDrive\Desktop\chess node\chess\obj\Debug\chess.pdb
 C:\Users\roey2\OneDrive\Desktop\chess node\chess\bin\Debug\chess.exe.config
 C:\Users\roey2\OneDrive\Desktop\chess node\chess\bin\Debug\chess.exe
 C:\Users\roey2\OneDrive\Desktop\chess node\chess\bin\Debug\chess.pdb
+C:\Users\roey2\OneDrive\Desktop\chessnoderight\chess-c-\chess\bin\Debug\chess.exe.config
+C:\Users\roey2\OneDrive\Desktop\chessnoderight\chess-c-\chess\bin\Debug\chess.exe
+C:\Users\roey2\OneDrive\Desktop\chessnoderight\chess-c-\chess\bin\Debug\chess.pdb
+C:\Users\roey2\OneDrive\Desktop\chessnoderight\chess-c-\chess\obj\Debug\chess.csproj.AssemblyReference.cache
+C:\Users\roey2\OneDrive\Desktop\chessnoderight\chess-c-\chess\obj\Debug\chess.csproj.CoreCompileInputs.cache
+C:\Users\roey2\OneDrive\Desktop\chessnoderight\chess-c-\chess\obj\Debug\chess.exe
+C:\Users\roey2\OneDrive\Desktop\chessnoderight\chess-c-\chess\obj\Debug\chess.pdb
+C:\Users\roey2\OneDrive\Desktop\chessnoder\chess-c-\chess\bin\Debug\chess.exe.config
+C:\Users\roey2\OneDrive\Desktop\chessnoder\chess-c-\chess\bin\Debug\chess.exe
+C:\Users\roey2\OneDrive\Desktop\chessnoder\chess-c-\chess\bin\Debug\chess.pdb
+C:\Users\roey2\OneDrive\Desktop\chessnoder\chess-c-\chess\obj\Debug\chess.csproj.AssemblyReference.cache
+C:\Users\roey2\OneDrive\Desktop\chessnoder\chess-c-\chess\obj\Debug\chess.csproj.CoreCompileInputs.cache
+C:\Users\roey2\OneDrive\Desktop\chessnoder\chess-c-\chess\obj\Debug\chess.exe
+C:\Users\roey2\OneDrive\Desktop\chessnoder\chess-c-\chess\obj\Debug\chess.pdb
+C:\Users\roey2\OneDrive\Desktop\chessnode_lasttowork\chess-c-\chess\bin\Debug\chess.exe.config
+C:\Users\roey2\OneDrive\Desktop\chessnode_lasttowork\chess-c-\chess\bin\Debug\chess.exe
+C:\Users\roey2\OneDrive\Desktop\chessnode_lasttowork\chess-c-\chess\bin\Debug\chess.pdb
+C:\Users\roey2\OneDrive\Desktop\chessnode_lasttowork\chess-c-\chess\obj\Debug\chess.csproj.AssemblyReference.cache
+C:\Users\roey2\OneDrive\Desktop\chessnode_lasttowork\chess-c-\chess\obj\Debug\chess.csproj.CoreCompileInputs.cache
+C:\Users\roey2\OneDrive\Desktop\chessnode_lasttowork\chess-c-\chess\obj\Debug\chess.exe
+C:\Users\roey2\OneDrive\Desktop\chessnode_lasttowork\chess-c-\chess\obj\Debug\chess.pdb

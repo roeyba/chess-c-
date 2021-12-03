@@ -18,7 +18,7 @@ namespace chess
         public int type;
         public bool iswhite;
         public int position; // 0-63 number represent location, the count starts from left to right for each row from down to up
-
+        //if a rook got eaten and needs to come back with the posibility to castle than his position = -1*position;
         public Peace(bool iswhite, int position)
         {
             this.iswhite = iswhite;

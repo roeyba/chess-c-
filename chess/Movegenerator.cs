@@ -20,8 +20,7 @@ namespace chess
          *2 - pawn promote to bishop
          *3 - pawn promote to rook
          *4 - pawn promote to queen
-         *5 - castle right
-         *6 - castle left
+         *5 - castle
          *7 - king moved, cant castle any more
          *8 - rook moved, cant castle at that side anymove
         */
@@ -106,11 +105,12 @@ namespace chess
         public List<Move> generate_moves()
         {
             List<Move> moves = new List<Move>();
-            List<Peace>[] parts = c.getcurrentplayerpeacelist();
+            List<Peace>[] parts;
 
             //go over all of the peaces of the curren player and for each peace add its moves to the "moves" list
             if (this.c.whiteturn)
             {
+                parts = this.c.white_parts;
                 foreach (Peace peace in parts[Peace.Pawn])//Peace.Knight
                 {
                     moves.AddRange(getmoves_w_pawn_pc(peace));
@@ -118,6 +118,7 @@ namespace chess
             }
             else
             {
+                parts = this.c.black_parts;
                 foreach (Peace peace in parts[Peace.Pawn])
                 {
                     moves.AddRange(getmoves_b_pawn_pc(peace));
@@ -151,6 +152,90 @@ namespace chess
             return moves;
         }
 
+        public List<Move> generate_attacking_moves()
+        {//only used to make sure the gemerator makes only ligal moves.
+
+            List<Move> moves = new List<Move>();
+            List<Peace>[] parts;
+
+            //go over all of the peaces of the curren player and for each peace add its moves to the "moves" list
+            if (this.c.whiteturn)
+            {
+                parts = this.c.white_parts;
+                foreach (Peace peace in parts[Peace.Pawn])//Peace.Knight
+                {
+                    moves.AddRange(getattackingmoves_w_pawn_pc(peace));
+                }
+            }
+            else
+            {
+                parts = this.c.black_parts;
+                foreach (Peace peace in parts[Peace.Pawn])
+                {
+                    moves.AddRange(getattackingmoves_b_pawn_pc(peace));
+                }
+            }
+
+            foreach (Peace peace in parts[Peace.Knight])
+            {
+                getmoves_knight_pc(peace, moves);
+            }
+
+            foreach (Peace peace in parts[Peace.Bishop])
+            {
+                getmoves_diagonal_pc(peace, moves);
+            }
+
+            foreach (Peace peace in parts[Peace.Rook])
+            {
+                getmoves_verticle_pc(peace, moves);
+            }
+            foreach (Peace peace in parts[Peace.Queen])
+            {
+                getmoves_verticle_pc(peace, moves);
+                getmoves_diagonal_pc(peace, moves);
+            }
+            foreach (Peace peace in parts[Peace.King])
+            {
+                Getmoves_king_pc(peace, moves);
+            }
+
+            return moves;
+        }
+
+        public List<Move> generate_moves(Peace peace)
+        {
+            if (peace.type == Peace.Pawn)
+            {
+                if (peace.iswhite)
+                    return getmoves_w_pawn_pc(peace);
+                return getmoves_b_pawn_pc(peace);
+            }
+            else
+            {
+                List<Move> moves = new List<Move>();
+                switch (peace.type)
+                {
+                    case Peace.Knight:
+                        getmoves_knight_pc(peace, moves);
+                        return moves;
+                    case Peace.Bishop:
+                        getmoves_diagonal_pc(peace, moves);
+                        return moves;
+                    case Peace.Rook:
+                        getmoves_verticle_pc(peace, moves);
+                        return moves;
+                    case Peace.Queen:
+                        getmoves_verticle_pc(peace, moves);
+                        getmoves_diagonal_pc(peace, moves);
+                        return moves;
+                    default: //case Peace.King:
+                        Getmoves_king_pc(peace, moves);
+                        return moves;
+                }
+            }
+        }
+
         public void getmoves_verticle_pc(Peace peace, List<Move> moves)
         {
             int i = peace.get_i_pos();
@@ -172,8 +257,9 @@ namespace chess
                 }
             }
 
+            int t; //iterator
             //generate all the moves right to the peace
-            for (int t = j + 1; t < chessboard.board_size; t++)
+            for (t = j + 1; t < chessboard.board_size; t++)
             {
                 if (!this.c.board[i, t].isocupied())
                 {
@@ -189,7 +275,7 @@ namespace chess
             }
 
             //generate all the moves left to the peace
-            for (int t = j - 1; t >= 0; t--)
+            for (t = j - 1; t >= 0; t--)
             {
                 if (!this.c.board[i, t].isocupied())
                 {
@@ -204,7 +290,7 @@ namespace chess
             }
 
             //generate all the moves down the peace
-            for (int t = i + 1; t < chessboard.board_size; t++)
+            for (t = i + 1; t < chessboard.board_size; t++)
             {
                 if (!this.c.board[t, j].isocupied())
                 {
@@ -219,7 +305,7 @@ namespace chess
             }
 
             //generate all the moves on top of the peace
-            for (int t = i - 1; t >= 0; t--)
+            for (t = i - 1; t >= 0; t--)
             {
                 if (!this.c.board[t, j].isocupied())
                 {
@@ -542,18 +628,10 @@ namespace chess
         {
             if (depth == 0) // if got to a leaf node
                 return 1;
-            //string tmpboardstate = this.c.get_fen_notation();
             List<Move> moves = Generatelegalmovesfrompseudolegal();
-            /*if(tmpboardstate != this.c.get_fen_notation())
-            {
-                //something went wrong...
-                Console.WriteLine(tmpboardstate);
-                Console.WriteLine(this.c.get_fen_notation());
-            }*/
             int leafnodes = 0;
             foreach (Move move in moves)
             {
-                //string boardst = this.c.get_fen_notation();
                 c.manualy_makemove(move);
                 int num = Perfit(depth - 1, headnode);
                 leafnodes += num;
@@ -563,13 +641,6 @@ namespace chess
                     //Console.WriteLine(c.get_fen_notation());
                 }
                 c.unmakelastmove();
-                /*if (boardst != this.c.get_fen_notation())
-                {
-                    //something went wrong...
-                    Console.WriteLine(boardst);
-                    Console.WriteLine(this.c.get_fen_notation());
-                    Console.WriteLine(move.Tostring());
-                }*/
             }
             return leafnodes;
         }
@@ -580,59 +651,65 @@ namespace chess
             List<Move> legalmoves = new List<Move>();
             foreach (Move tmpmove in pseudolegalmoves)
             {
-                bool notallowedtocastle = false;
-                if (tmpmove.edgecase == Move.castle)
-                {
-                    int king_pos1;
-                    if (this.c.whiteturn)
-                    {
-                        king_pos1 = c.white_parts[Peace.King][0].position;
-                    }
-                    else
-                    {
-                        king_pos1 = c.black_parts[Peace.King][0].position;
-                    }
-                    this.c.whiteturn = !this.c.whiteturn;
-                    List<Move> nextmoves1 = generate_moves();
-                    this.c.whiteturn = !this.c.whiteturn;
-                    if (nextmoves1.Any(move => move.endsquare == king_pos1))// if in check and want to castle
-                        notallowedtocastle = true;
-                }// if want to castle - making sure the king isnt in check
-                
-                //string boardst = this.c.get_fen_notation();
                 c.manualy_makemove(tmpmove);
-                int kingbeforecastling; //where the king is before moving at all
                 int king_pos;
                 if (this.c.whiteturn)
-                {
-                    kingbeforecastling = 4;
                     king_pos = c.black_parts[Peace.King][0].position;
-                }
                 else
-                {
                     king_pos = c.white_parts[Peace.King][0].position;
-                    kingbeforecastling = 60;
-                }
-                List<Move> nextmoves = generate_moves();
+
+                List<Move> nextmoves = generate_attacking_moves();
                 if (!nextmoves.Any(move => move.endsquare == king_pos))
                 {
-                    if (tmpmove.edgecase == Move.castle && nextmoves.Any(move => move.endsquare == kingbeforecastling)) { }// if in check and want to castle
-                    else if (tmpmove.edgecase == Move.castle && (king_pos%8 ==6) && nextmoves.Any(move => move.endsquare == king_pos - 1)) { } //castle right
-                    else if (tmpmove.edgecase == Move.castle && (king_pos % 8 == 2) && nextmoves.Any(move => move.endsquare == king_pos + 1)) { }//castle left
-                    else if (notallowedtocastle) { }
-                    else
-                        legalmoves.Add(tmpmove);
+                    if(tmpmove.edgecase == Move.castle) //if the movement is a castle, making sure the move is legal
+                    {
+                        int kingbeforecastling; //where the king is before moving at all
+                        if (this.c.whiteturn)
+                            kingbeforecastling = 4;
+                        else
+                            kingbeforecastling = 60;
+                        foreach (Move move in nextmoves)
+                        {//    if in check and want to castle        //castle right                                          //castle left
+                            if (move.endsquare == kingbeforecastling ||(king_pos % 8 == 6 && move.endsquare == king_pos - 1) || (king_pos % 8 == 2 && move.endsquare == king_pos + 1))
+                                goto LoopEnd;
+                        }
+                    }
+                    legalmoves.Add(tmpmove);
                 }
+                LoopEnd:
                 this.c.unmakelastmove();
-                /*if (boardst != this.c.get_fen_notation())
-                {
-                    //something went wrong...
-                    Console.WriteLine(this.c.ToString());
-                    Console.WriteLine(boardst);
-                    Console.WriteLine(this.c.get_fen_notation());
-                }*/
             }
             return legalmoves;
+        }
+
+        public List<Move> getattackingmoves_w_pawn_pc(Peace wpawn)
+        {
+            List<Move> moves = new List<Move>();
+            int j = wpawn.get_j_pos();
+
+            if (j != chessboard.board_size - 1)//not at the edge right of the board
+            {
+                moves.Add(new Move(wpawn.position, wpawn.position - 7));//normal capture right
+            }
+            if (j != 0)//not at the edge left of the board
+            {
+                moves.Add(new Move(wpawn.position, wpawn.position - 9, Move.enpassant));//normal capture left
+            }
+            return moves;
+        }
+        public List<Move> getattackingmoves_b_pawn_pc(Peace bpawn)
+        {
+            List<Move> moves = new List<Move>();
+            int j = bpawn.get_j_pos();
+            if (j != 0)//not at the edge left of the board
+            {
+                moves.Add(new Move(bpawn.position, bpawn.position + 7));//normal capture left
+            }
+            if (j != chessboard.board_size - 1) //not at the edge right of the board
+            {
+                moves.Add(new Move(bpawn.position, bpawn.position + 9));//normal capture right
+            }
+            return moves;
         }
 
     }

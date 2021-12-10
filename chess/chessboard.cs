@@ -23,7 +23,7 @@ namespace chess
                 return false;
             return true;
         }
-        public Boolean canmove(Peace peace)
+        public Boolean canmove(Peace peace) // if psudolegaly allowed to move a peace to that tile.
         {
             if (isocupied())
             {
@@ -579,20 +579,24 @@ namespace chess
             int init_j = char.ToUpper(four_letters_position[0]) - 65;
             int final_i = Math.Abs(four_letters_position[3] - '0' - 8);
             int final_j = char.ToUpper(four_letters_position[2]) - 65;
-            manualy_makemove(new Move(init_i * 8 + init_j, final_i * 8 + final_j, edgecase));
+
+            List<Move> moves = this.generator.generate_moves(this.board[init_i, init_j].Peace);
+            moves.Any(move => move.startsquare == init_i * 8 + init_j & move.endsquare == final_i * 8 + final_j);
+            foreach (Move move in moves)
+            {
+                if(move.startsquare == init_i * 8 + init_j & move.endsquare == final_i * 8 + final_j)
+                {
+                    manualy_makemove(new Move(init_i * 8 + init_j, final_i * 8 + final_j, move.edgecase));
+                    return;
+                }
+            }
+            Console.WriteLine("move is ilegal...");
         }
 
         //switch the boolean value indicates which player turn it is to play
         public void switchplayerturn()
         {
             this.whiteturn = !this.whiteturn;
-        }
-
-        public List<Peace>[] getcurrentplayerpeacelist()
-        {
-            if (this.whiteturn)
-                return this.white_parts;
-            return this.black_parts;
         }
 
         //return a string representation of the board

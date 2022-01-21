@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 
 namespace chess
 {
-    // create a data stract - Move that containe the start and end of a move
-    // stract - a way of orginizing data
+    //structer for holding a move
     public struct Move
     {
         public readonly int startsquare;
@@ -72,37 +71,61 @@ namespace chess
             return false;
         }
     }
-    /*
-     -Check en passant:
-
-    // En passant captures are a tricky special case. Because they are rather
-    // uncommon, we do it simply by testing whether the king is attacked after
-    // the move is made.
-
-    -Do you want move your king?
-
-    // If the moving piece is a king, check whether the destination
-    // square is attacked by the opponent. Castling moves are checked
-    // for legality during move generation.
-
-    -You can make the move if it's not pinned. Or it's pinned, but it still protects the king.
-
-    // A non-king move is legal if and only if it is not pinned or it
-    // is moving along the ray towards or away from the king.
-    */
+    
     public class Movegenerator
     {
         private chessboard c;
-        //public long WA = 0L, WP = 0L, BA = 0L, BP = 0L; //white attacking squares, white pinned peaces  //the rest is the same for black
-
+        //constractor.
         public Movegenerator(chessboard chess)
         {
             this.c = chess;
         }
 
-        //generates all the legal moves that exist in this chess board position
+        //generate all of the legal moves for one peace
+        public List<Move> generate_legal_moves(Peace peace)
+        {
+            if (peace.type == Peace.Pawn)
+            {
+                if (peace.iswhite)
+                    return Generatelegalmovesfrompseudolegal(getmoves_w_pawn_pc(peace));
+                return Generatelegalmovesfrompseudolegal(getmoves_b_pawn_pc(peace));
+            }
+            else
+            {
+                List<Move> moves = new List<Move>();
+                switch (peace.type)
+                {
+                    case Peace.Knight:
+                        getmoves_knight_pc(peace, moves);
+                        return Generatelegalmovesfrompseudolegal(moves);
+                    case Peace.Bishop:
+                        getmoves_diagonal_pc(peace, moves);
+                        return Generatelegalmovesfrompseudolegal(moves);
+                    case Peace.Rook:
+                        getmoves_verticle_pc(peace, moves);
+                        return Generatelegalmovesfrompseudolegal(moves);
+                    case Peace.Queen:
+                        getmoves_verticle_pc(peace, moves);
+                        getmoves_diagonal_pc(peace, moves);
+                        return Generatelegalmovesfrompseudolegal(moves);
+                    case Peace.King:
+                        Getmoves_king_pc(peace, moves);
+                        return Generatelegalmovesfrompseudolegal(moves);
+                    default:
+                        return null;
+                }
+            }
+        }
+        
+        //generate all of the ligal moves.
+        public List<Move> generate_all_legal_moves()
+        {
+            return Generatelegalmovesfrompseudolegal(generate_psudo_legal_moves());
+        }
+
+        //generates all the psudo-legal moves that exist in this chess board position
         // all the generated moves return ass a list that contain move objects
-        public List<Move> generate_moves()
+        private List<Move> generate_psudo_legal_moves()
         {
             List<Move> moves = new List<Move>();
             List<Peace>[] parts;
@@ -148,95 +171,13 @@ namespace chess
             {
                 Getmoves_king_pc(peace, moves);
             }
-            
-            return moves;
-        }
-
-        public List<Move> generate_attacking_moves()
-        {//only used to make sure the gemerator makes only ligal moves.
-
-            List<Move> moves = new List<Move>();
-            List<Peace>[] parts;
-
-            //go over all of the peaces of the curren player and for each peace add its moves to the "moves" list
-            if (this.c.whiteturn)
-            {
-                parts = this.c.white_parts;
-                foreach (Peace peace in parts[Peace.Pawn])//Peace.Knight
-                {
-                    moves.AddRange(getattackingmoves_w_pawn_pc(peace));
-                }
-            }
-            else
-            {
-                parts = this.c.black_parts;
-                foreach (Peace peace in parts[Peace.Pawn])
-                {
-                    moves.AddRange(getattackingmoves_b_pawn_pc(peace));
-                }
-            }
-
-            foreach (Peace peace in parts[Peace.Knight])
-            {
-                getmoves_knight_pc(peace, moves);
-            }
-
-            foreach (Peace peace in parts[Peace.Bishop])
-            {
-                getmoves_diagonal_pc(peace, moves);
-            }
-
-            foreach (Peace peace in parts[Peace.Rook])
-            {
-                getmoves_verticle_pc(peace, moves);
-            }
-            foreach (Peace peace in parts[Peace.Queen])
-            {
-                getmoves_verticle_pc(peace, moves);
-                getmoves_diagonal_pc(peace, moves);
-            }
-            foreach (Peace peace in parts[Peace.King])
-            {
-                Getmoves_king_pc(peace, moves);
-            }
 
             return moves;
         }
 
-        public List<Move> generate_moves(Peace peace)
-        {
-            if (peace.type == Peace.Pawn)
-            {
-                if (peace.iswhite)
-                    return getmoves_w_pawn_pc(peace);
-                return getmoves_b_pawn_pc(peace);
-            }
-            else
-            {
-                List<Move> moves = new List<Move>();
-                switch (peace.type)
-                {
-                    case Peace.Knight:
-                        getmoves_knight_pc(peace, moves);
-                        return moves;
-                    case Peace.Bishop:
-                        getmoves_diagonal_pc(peace, moves);
-                        return moves;
-                    case Peace.Rook:
-                        getmoves_verticle_pc(peace, moves);
-                        return moves;
-                    case Peace.Queen:
-                        getmoves_verticle_pc(peace, moves);
-                        getmoves_diagonal_pc(peace, moves);
-                        return moves;
-                    default: //case Peace.King:
-                        Getmoves_king_pc(peace, moves);
-                        return moves;
-                }
-            }
-        }
-
-        public void getmoves_verticle_pc(Peace peace, List<Move> moves)
+        //these functions return or add to a input list the psudo-legal moves that a peace can do.
+        //all of this fucntions are united in "generate_psudo_legal_moves()", in that function all of the posible psudo-legal moves in a board are assembled.
+        private void getmoves_verticle_pc(Peace peace, List<Move> moves)
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
@@ -319,8 +260,7 @@ namespace chess
                 }
             }
         }
-
-        public void getmoves_diagonal_pc(Peace peace, List<Move> moves)
+        private void getmoves_diagonal_pc(Peace peace, List<Move> moves)
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
@@ -385,8 +325,7 @@ namespace chess
                 }
             }
         }
-
-        public List<Move> getmoves_w_pawn_pc(Peace wpawn)
+        private List<Move> getmoves_w_pawn_pc(Peace wpawn)
         {
             List<Move> moves = new List<Move>();
             int i = wpawn.get_i_pos();
@@ -455,8 +394,7 @@ namespace chess
             else
                 return moves;
         }
-
-        public List<Move> getmoves_b_pawn_pc(Peace bpawn) //this one is done - the second one shoud be more ifishent
+        private List<Move> getmoves_b_pawn_pc(Peace bpawn)
         {
             List<Move> moves = new List<Move>();
             int i = bpawn.get_i_pos();
@@ -525,8 +463,7 @@ namespace chess
             else
                 return moves;
         }
-
-        public void getmoves_knight_pc(Peace knight, List<Move> moves)
+        private void getmoves_knight_pc(Peace knight, List<Move> moves)
         {
             int i = knight.get_i_pos();
             int j = knight.get_j_pos();
@@ -555,8 +492,7 @@ namespace chess
                 second = 2;
             }
         }
-
-        public void Getmoves_king_pc(Peace king, List<Move> moves) 
+        private void Getmoves_king_pc(Peace king, List<Move> moves) 
         {
             int i = king.get_i_pos();
             int j = king.get_j_pos();
@@ -619,16 +555,18 @@ namespace chess
             //
         }
 
+
+        //Wrapping Operation - only for outside usege!
         public int Perft(int depth)
         {
             return Perfit(depth, depth);
         }
-
-        public int Perfit(int depth, int headnode)
+        //internal Operation - only for inside usege!
+        private int Perfit(int depth, int headnode)
         {
             if (depth == 0) // if got to a leaf node
                 return 1;
-            List<Move> moves = Generatelegalmovesfrompseudolegal();
+            List<Move> moves = generate_all_legal_moves();
             int leafnodes = 0;
             foreach (Move move in moves)
             {
@@ -645,9 +583,9 @@ namespace chess
             return leafnodes;
         }
 
-        public List<Move> Generatelegalmovesfrompseudolegal()
+        //gets a list of pseudo-legal moves and return a list with all of the legal moves in this list
+        private List<Move> Generatelegalmovesfrompseudolegal(List<Move> pseudolegalmoves)
         {
-            List<Move> pseudolegalmoves = generate_moves();
             List<Move> legalmoves = new List<Move>();
             foreach (Move tmpmove in pseudolegalmoves)
             {
@@ -682,6 +620,59 @@ namespace chess
             return legalmoves;
         }
 
+
+        //generate all of the moves where the player can attack at(not matter if there is a peace you can eat in those squers)
+        internal List<Move> generate_attacking_moves()
+        {//only used to make sure the gemerator makes only ligal moves.
+
+            List<Move> moves = new List<Move>();
+            List<Peace>[] parts;
+
+            //go over all of the peaces of the curren player and for each peace add its moves to the "moves" list
+            if (this.c.whiteturn)
+            {
+                parts = this.c.white_parts;
+                foreach (Peace peace in parts[Peace.Pawn])//Peace.Knight
+                {
+                    moves.AddRange(getattackingmoves_w_pawn_pc(peace));
+                }
+            }
+            else
+            {
+                parts = this.c.black_parts;
+                foreach (Peace peace in parts[Peace.Pawn])
+                {
+                    moves.AddRange(getattackingmoves_b_pawn_pc(peace));
+                }
+            }
+
+            foreach (Peace peace in parts[Peace.Knight])
+            {
+                getmoves_knight_pc(peace, moves);
+            }
+
+            foreach (Peace peace in parts[Peace.Bishop])
+            {
+                getmoves_diagonal_pc(peace, moves);
+            }
+
+            foreach (Peace peace in parts[Peace.Rook])
+            {
+                getmoves_verticle_pc(peace, moves);
+            }
+            foreach (Peace peace in parts[Peace.Queen])
+            {
+                getmoves_verticle_pc(peace, moves);
+                getmoves_diagonal_pc(peace, moves);
+            }
+            foreach (Peace peace in parts[Peace.King])
+            {
+                Getmoves_king_pc(peace, moves);
+            }
+
+            return moves;
+        }
+        //generate the black/white pawn attacking squers.
         public List<Move> getattackingmoves_w_pawn_pc(Peace wpawn)
         {
             List<Move> moves = new List<Move>();

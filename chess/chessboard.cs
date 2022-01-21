@@ -321,6 +321,12 @@ namespace chess
             }
             this.black_parts[peace.type].Add(peace);
         }
+        private List<Peace>[] get_current_player_list()
+        {
+            if (this.whiteturn)
+                return this.white_parts;
+            return this.black_parts;
+        }
 
         //take a move - not matter if the move eats a peace of the same color of the eater
         //takes a move - no matter whose turn to play it is!!!!
@@ -580,7 +586,7 @@ namespace chess
             int final_i = Math.Abs(four_letters_position[3] - '0' - 8);
             int final_j = char.ToUpper(four_letters_position[2]) - 65;
 
-            List<Move> moves = this.generator.generate_moves(this.board[init_i, init_j].Peace);
+            List<Move> moves = this.generator.generate_legal_moves(this.board[init_i, init_j].Peace);
             moves.Any(move => move.startsquare == init_i * 8 + init_j & move.endsquare == final_i * 8 + final_j);
             foreach (Move move in moves)
             {
@@ -630,8 +636,8 @@ namespace chess
             return tmp;
         }
 
-        //return a string representation of the board from the list - used for testing
-        public string ToStringfromlist()
+        //return a string representation of the board from the list - used for testing internaly
+        private string ToStringfromlist()
         { //return a string representation of the board
             char[,] board2 = new char[board_size, board_size];
             for (int i = 0; i < board_size; i++)
@@ -690,7 +696,7 @@ namespace chess
             return tmp;
         }
 
-        public string get_all_moves(bool withlines =true)
+        public string get_all_played_moves(bool with_new_lines =true)
         {
             string movesst = "";
             Stack<Move> tmpmoves = new Stack<Move>();
@@ -702,7 +708,7 @@ namespace chess
             {
                 Move move = tmpmoves.Pop();
                 movesst += move.Tostring();
-                if (withlines)
+                if (with_new_lines)
                     movesst += "\n";
                 this.moves.Push(move);
             }
@@ -713,17 +719,34 @@ namespace chess
         {
             Console.WriteLine(this.ToString());
             Console.WriteLine(this.get_fen_notation());
-            Console.WriteLine(this.get_all_moves());
+            Console.WriteLine(this.get_all_played_moves());
+        }
+        
+        //return if the current players turn king's is in check
+        public Boolean current_player_king_in_check()
+        {
+            bool ans = false;
+            int kingpos = this.get_current_player_list()[Peace.King][0].position;
+            this.switchplayerturn(); //so i could find out if the opponent attack the player
+            foreach (Move attackmove in generator.generate_attacking_moves()) //check if the king in check - therfore, checkmate/stalemate.
+            {
+                if (attackmove.endsquare == kingpos)
+                {
+                    ans= true; break;
+                }
+            }
+            switchplayerturn();
+            return ans;
         }
 
+        //return if the king moved at least once sience the beggining of the game.
         public bool kingdidntmoved(bool iswhite)
         {// check if the king of that peace didnt move from there position once.
             if (iswhite)
-            {
                 return this.can_castle[0];
-            }
             return this.can_castle[3];
         }
+
         public int getoffset(bool iswhite)
         {
             if (iswhite)

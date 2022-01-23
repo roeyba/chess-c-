@@ -41,7 +41,7 @@ namespace chess
         public const int rook_moving = 8; //the rook hasnt moved once since the beggining of the game
         public const int enpassant = 9;
 
-        public string Tostring()
+        public string print_in_notation()
         {
             string promotion_peace = "";
             if(this.edgecase !=0)
@@ -69,6 +69,10 @@ namespace chess
             if (this.edgecase == Move.pawn_promote_to_queen || this.edgecase == Move.pawn_promote_to_rook || this.edgecase == Move.pawn_promote_to_bishop || this.edgecase == Move.pawn_promote_to_knight)
                 return true;
             return false;
+        }
+        public string to_mininal_string()
+        {
+            return (startsquare.ToString() +","+ endsquare.ToString());
         }
     }
     
@@ -575,7 +579,7 @@ namespace chess
                 leafnodes += num;
                 if (depth == headnode)
                 {
-                    Console.WriteLine(move.Tostring() + num);
+                    Console.WriteLine(move.print_in_notation() + num);
                     //Console.WriteLine(c.get_fen_notation());
                 }
                 c.unmakelastmove();

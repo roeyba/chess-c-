@@ -707,12 +707,14 @@ namespace chess
             while (tmpmoves.Count != 0)
             {
                 Move move = tmpmoves.Pop();
-                movesst += move.Tostring();
+                movesst += move.to_mininal_string();
                 if (with_new_lines)
                     movesst += "\n";
+                else
+                    movesst += "-";
                 this.moves.Push(move);
             }
-            return movesst;
+            return movesst.Remove(movesst.Length - 1);
         }
 
         public void printstatics()

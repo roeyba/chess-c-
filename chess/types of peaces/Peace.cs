@@ -76,6 +76,29 @@ namespace chess
             }
             return '#';
         }
+        public int get_value()
+        {
+            switch (this.type)
+            {
+                case 0:
+                    return 1;
+                case 1:
+                    return 3;
+                //
+                case 2:
+                    return 3;
+                case 3:
+                    return 5;
+                //
+                case 4:
+                    return 9;
+                //
+                case 5:
+                    return 1000;
+                    //
+            }
+            return '#';
+        }
 
         public int[] get_xy_pos()
         {

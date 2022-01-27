@@ -707,6 +707,117 @@ namespace chess
             return moves;
         }
 
+        //return the move the AI wants to play.
+        public Move choose_move(int depth) //the assamption is that the game isnt over yet
+        {
+            return minimax_getmove(this.c, depth, Int32.MinValue, Int32.MaxValue, true); //initial call
+        }
+        // a rapt function for minimx, return the optimal Move obj.
+        static Move minimax_getmove(chessboard position, int depth, int alpha, int beta, Boolean maximizingPlayer)
+        {// https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-4-alpha-beta-pruning/
+
+            List<Move> child_nodes = position.generator.generate_all_legal_moves();
+            Move bestmove = new Move();
+
+            if (maximizingPlayer)// my turn
+            {
+                int best_eval = Int32.MinValue;
+
+                // Recur for left and
+                // right children
+                for (int i = 0; i < child_nodes.Count; i++)
+                {
+                    position.manualy_makemove(child_nodes[i]);
+                    int eval = minimax(position, depth - 1, alpha, beta, false);
+                    if (eval > best_eval)
+                    {
+                        best_eval = eval;
+                        bestmove = child_nodes[i];
+                    }
+                    position.unmakelastmove();
+                    alpha = Math.Max(alpha, eval);
+
+                    // Alpha Beta Pruning
+                    if (beta <= alpha)
+                        break;
+                }
+                return bestmove;
+            }
+            else //opponent turn
+            {
+                int worst_eval = Int32.MaxValue;
+
+                // Recur for left and
+                // right children
+                for (int i = 0; i < child_nodes.Count; i++)
+                {
+                    position.manualy_makemove(child_nodes[i]);
+                    int eval = minimax(position, depth - 1, alpha, beta, true);
+                    if (eval < worst_eval)
+                    {
+                        worst_eval = eval;
+                        bestmove = child_nodes[i];
+                    }
+                    position.unmakelastmove();
+                    beta = Math.Min(beta, eval);
+
+                    // Alpha Beta Pruning
+                    if (beta <= alpha)
+                        break;
+                }
+                return bestmove;
+            }
+        }
+
+        //minmax and alpha beta pruning.
+        static int minimax(chessboard position, int depth, int alpha, int beta, Boolean maximizingPlayer)
+        {
+            List<Move> child_nodes = position.generator.generate_all_legal_moves();
+            // leaf node is reached
+            if (depth == 0 || child_nodes.Count == 0)
+                return position.Evaluate();
+
+            if (maximizingPlayer)// my turn
+            {
+                int best_eval = Int32.MinValue;
+
+                // Recur for left and
+                // right children
+                for (int i = 0; i < child_nodes.Count; i++)
+                {
+                    position.manualy_makemove(child_nodes[i]);
+                    int eval = minimax(position, depth - 1, alpha, beta, false);
+                    position.unmakelastmove();
+                    best_eval = Math.Max(best_eval, eval);
+                    alpha = Math.Max(alpha, eval);
+
+                    // Alpha Beta Pruning
+                    if (beta <= alpha)
+                        break;
+                }
+                return best_eval;
+            }
+            else //opponent turn
+            {
+                int worst_eval = Int32.MaxValue;
+
+                // Recur for left and
+                // right children
+                for (int i = 0; i < child_nodes.Count; i++)
+                {
+                    position.manualy_makemove(child_nodes[i]);
+                    int eval = minimax(position, depth - 1, alpha, beta, true);
+                    position.unmakelastmove();
+                    worst_eval = Math.Min(worst_eval, eval);
+                    beta = Math.Min(beta, eval);
+
+                    // Alpha Beta Pruning
+                    if (beta <= alpha)
+                        break;
+                }
+                return worst_eval;
+            }
+        }
     }
 
 }

@@ -769,5 +769,22 @@ namespace chess
             const string letters = "ABCDEFGH";
             return letters[get_j_pos(position)];
         }
+
+        public int Evaluate()
+        {//needs to ivaluate checkmates and drews.
+            int white_count=0;
+            for (int i = 0; i < peaces_types_amount; i++)
+            {
+                foreach(Peace peace in this.white_parts[i])
+                {
+                    white_count += peace.get_value();
+                }
+                foreach (Peace peace in this.black_parts[i])
+                {
+                    white_count -= peace.get_value();
+                }
+            }
+            return white_count;
+        }
     }
 }

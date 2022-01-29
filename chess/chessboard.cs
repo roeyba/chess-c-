@@ -770,21 +770,23 @@ namespace chess
             return letters[get_j_pos(position)];
         }
 
+        //*this evaltuation is relative to the player that makes the move:
+        //cases:
+        //Evaluate()==0  => the position is equal.
+        //Evaluate()>0   => the side who's turn it is to move is doing better.
+        //Evaluate()<0   => the other side is doing better.
         public int Evaluate()
-        {//needs to ivaluate checkmates and drews.
-            int white_count=0;
-            for (int i = 0; i < peaces_types_amount; i++)
-            {
-                foreach(Peace peace in this.white_parts[i])
-                {
-                    white_count += peace.get_value();
-                }
-                foreach (Peace peace in this.black_parts[i])
-                {
-                    white_count -= peace.get_value();
-                }
-            }
-            return white_count;
+        {//doesnt ivaluate checkmates and draws.
+            int diff_count=0;
+            diff_count += (this.white_parts[Peace.Pawn].Count   - this.black_parts[Peace.Pawn].Count)   * Peace.Pawn_value;
+            diff_count += (this.white_parts[Peace.Knight].Count - this.black_parts[Peace.Knight].Count) * Peace.Knight_value;
+            diff_count += (this.white_parts[Peace.Bishop].Count - this.black_parts[Peace.Bishop].Count) * Peace.Bishop_value;
+            diff_count += (this.white_parts[Peace.Rook].Count   - this.black_parts[Peace.Rook].Count)   * Peace.Rook_value;
+            diff_count += (this.white_parts[Peace.Queen].Count  - this.black_parts[Peace.Queen].Count)  * Peace.Queen_value;
+
+            //int prespective= (this.whiteturn) ? 1 : -1; //1 if its white turn, -1 if it its black turn.
+            //return diff_count * prespective;
+            return diff_count;
         }
     }
 }

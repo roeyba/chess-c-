@@ -710,114 +710,87 @@ namespace chess
         //return the move the AI wants to play.
         public Move choose_move(int depth) //the assamption is that the game isnt over yet
         {
-            return minimax_getmove(this.c, depth, Int32.MinValue, Int32.MaxValue, true); //initial call
+            //aplpha: the worst posible score for white - negative infinity
+            //beta: the worst posible score for black - positive infinity
+            return alphaBetaMax_getmove(alpha : int.MinValue, beta : int.MaxValue, depth);
         }
+        
         // a rapt function for minimx, return the optimal Move obj.
-        static Move minimax_getmove(chessboard position, int depth, int alpha, int beta, Boolean maximizingPlayer)
-        {// https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-4-alpha-beta-pruning/
-
-            List<Move> child_nodes = position.generator.generate_all_legal_moves();
-            Move bestmove = new Move();
-
-            if (maximizingPlayer)// my turn
-            {
-                int best_eval = Int32.MinValue;
-
-                // Recur for left and
-                // right children
-                for (int i = 0; i < child_nodes.Count; i++)
-                {
-                    position.manualy_makemove(child_nodes[i]);
-                    int eval = minimax(position, depth - 1, alpha, beta, false);
-                    if (eval > best_eval)
-                    {
-                        best_eval = eval;
-                        bestmove = child_nodes[i];
-                    }
-                    position.unmakelastmove();
-                    alpha = Math.Max(alpha, eval);
-
-                    // Alpha Beta Pruning
-                    if (beta <= alpha)
-                        break;
-                }
-                return bestmove;
-            }
-            else //opponent turn
-            {
-                int worst_eval = Int32.MaxValue;
-
-                // Recur for left and
-                // right children
-                for (int i = 0; i < child_nodes.Count; i++)
-                {
-                    position.manualy_makemove(child_nodes[i]);
-                    int eval = minimax(position, depth - 1, alpha, beta, true);
-                    if (eval < worst_eval)
-                    {
-                        worst_eval = eval;
-                        bestmove = child_nodes[i];
-                    }
-                    position.unmakelastmove();
-                    beta = Math.Min(beta, eval);
-
-                    // Alpha Beta Pruning
-                    if (beta <= alpha)
-                        break;
-                }
-                return bestmove;
-            }
-        }
-
         //minmax and alpha beta pruning.
-        static int minimax(chessboard position, int depth, int alpha, int beta, Boolean maximizingPlayer)
+        public Move alphaBetaMax_getmove(int alpha, int beta, int depth)
         {
-            List<Move> child_nodes = position.generator.generate_all_legal_moves();
-            // leaf node is reached
-            if (depth == 0 || child_nodes.Count == 0)
-                return position.Evaluate();
+            //assuming deph>0 and there are at least one move to be made at that position
+            List<Move> child_nodes = this.c.generator.generate_all_legal_moves();
+            Move best_move =new Move();
 
-            if (maximizingPlayer)// my turn
+            for (int i = 0; i < child_nodes.Count; i++)
             {
-                int best_eval = Int32.MinValue;
-
-                // Recur for left and
-                // right children
-                for (int i = 0; i < child_nodes.Count; i++)
+                this.c.manualy_makemove(child_nodes[i]);
+                int score = alphaBetaMin(alpha, beta, depth - 1);
+                this.c.unmakelastmove();
+                if (score >= beta)
+                    return child_nodes[i];   // fail hard beta-cutoff
+                if (score > alpha)
                 {
-                    position.manualy_makemove(child_nodes[i]);
-                    int eval = minimax(position, depth - 1, alpha, beta, false);
-                    position.unmakelastmove();
-                    best_eval = Math.Max(best_eval, eval);
-                    alpha = Math.Max(alpha, eval);
-
-                    // Alpha Beta Pruning
-                    if (beta <= alpha)
-                        break;
+                    alpha = score; // alpha acts like max in MiniMax
+                    best_move = child_nodes[i];
                 }
-                return best_eval;
             }
-            else //opponent turn
-            {
-                int worst_eval = Int32.MaxValue;
-
-                // Recur for left and
-                // right children
-                for (int i = 0; i < child_nodes.Count; i++)
-                {
-                    position.manualy_makemove(child_nodes[i]);
-                    int eval = minimax(position, depth - 1, alpha, beta, true);
-                    position.unmakelastmove();
-                    worst_eval = Math.Min(worst_eval, eval);
-                    beta = Math.Min(beta, eval);
-
-                    // Alpha Beta Pruning
-                    if (beta <= alpha)
-                        break;
-                }
-                return worst_eval;
-            }
+            return best_move;
         }
+
+        public int alphaBetaMax(int alpha, int beta, int depthleft)
+        {
+            if (depthleft == 0) return this.c.Evaluate();
+
+            List<Move> child_nodes = this.c.generator.generate_all_legal_moves();
+            // leaf node is reached
+            if (child_nodes.Count == 0)// draw or someone won
+            {
+                if (this.c.current_player_king_in_check()) //if checkmate
+                    return Int32.MinValue;
+                return 0;//draw
+            }
+
+            for (int i = 0; i < child_nodes.Count; i++)
+            {
+                this.c.manualy_makemove(child_nodes[i]);
+                int score = alphaBetaMin(alpha, beta, depthleft - 1);
+                this.c.unmakelastmove();
+                if (score >= beta)
+                    return beta;   // fail hard beta-cutoff
+                if (score > alpha)
+                    alpha = score; // alpha acts like max in MiniMax
+            }
+            return alpha;
+        }
+        public int alphaBetaMin(int alpha, int beta, int depthleft)
+        {
+            if (depthleft == 0) return -this.c.Evaluate();
+
+            List<Move> child_nodes = this.c.generator.generate_all_legal_moves();
+            // leaf node is reached
+            if (child_nodes.Count == 0)// draw or someone won
+            {
+                if (this.c.current_player_king_in_check()) //if checkmate
+                    return Int32.MaxValue;
+                return 0;//draw
+            }
+
+            for (int i = 0; i < child_nodes.Count; i++)
+            {
+                this.c.manualy_makemove(child_nodes[i]);
+                int score = alphaBetaMax(alpha, beta, depthleft - 1);
+                this.c.unmakelastmove();
+                if (score <= alpha)
+                    return alpha; // fail hard alpha-cutoff
+                if (score < beta)
+                    beta = score; // beta acts like min in MiniMax
+            }
+            return beta;
+        }
+
+
     }
 
 }

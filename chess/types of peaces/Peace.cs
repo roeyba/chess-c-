@@ -9,12 +9,12 @@ namespace chess
     public class Peace
     {
         //const is unchangeble variable and it's static
-        public const int Pawn   = 0;
-        public const int Knight = 1;
-        public const int Bishop = 2;
-        public const int Rook   = 3;
-        public const int Queen  = 4;
-        public const int King   = 5;
+        public const int Pawn   = 0; public const int Pawn_value = 1;
+        public const int Knight = 1; public const int Knight_value = 3;
+        public const int Bishop = 2; public const int Bishop_value = 3;
+        public const int Rook   = 3; public const int Rook_value = 5;
+        public const int Queen  = 4; public const int Queen_value = 9;
+        public const int King   = 5; //public const int King_value = 99999;
         public int type;
         public bool iswhite;
         public int position; // 0-63 number represent location, the count starts from left to right for each row from down to up
@@ -72,29 +72,6 @@ namespace chess
                     if (iswhite)
                         return 'K';
                     return 'k';
-                    //
-            }
-            return '#';
-        }
-        public int get_value()
-        {
-            switch (this.type)
-            {
-                case 0:
-                    return 1;
-                case 1:
-                    return 3;
-                //
-                case 2:
-                    return 3;
-                case 3:
-                    return 5;
-                //
-                case 4:
-                    return 9;
-                //
-                case 5:
-                    return 1000;
                     //
             }
             return '#';

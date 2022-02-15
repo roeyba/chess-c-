@@ -89,7 +89,23 @@ namespace chess
         {//return the i value of the peace the board matrix
             return this.position % 8;
         }
-
+        public int GetPieceValue()
+        {
+            switch (this.type)
+            {
+                case 0:
+                    return Pawn_value;
+                case 1:
+                    return Knight_value;
+                case 2:
+                    return Bishop_value;
+                case 3:
+                    return Rook_value;
+                case 4:
+                    return Queen_value;
+            }
+            return int.MaxValue;
+        }
 
     }
 }

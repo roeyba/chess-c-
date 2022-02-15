@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="chessboard.cs" />
     <Compile Include="Movegenerator.cs" />
+    <Compile Include="Move_list_ordering.cs" />
     <Compile Include="types of peaces\Peace.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

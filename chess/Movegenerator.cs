@@ -79,10 +79,12 @@ namespace chess
     public class Movegenerator
     {
         private chessboard c;
+        private Move_list_ordering mo;
         //constractor.
         public Movegenerator(chessboard chess)
         {
             this.c = chess;
+            this.mo = new Move_list_ordering(chess);
         }
 
         //generate all of the legal moves for one peace
@@ -720,7 +722,7 @@ namespace chess
         public Move alphaBetaMax_getmove(int alpha, int beta, int depth)
         {
             //assuming deph>0 and there are at least one move to be made at that position
-            List<Move> child_nodes = this.c.generator.generate_all_legal_moves();
+            List<Move> child_nodes = this.mo.OrdereMoves(this.c.generator.generate_all_legal_moves());
             Move best_move =new Move();
 
             for (int i = 0; i < child_nodes.Count; i++)
@@ -743,7 +745,7 @@ namespace chess
         {
             if (depthleft == 0) return this.c.Evaluate();
 
-            List<Move> child_nodes = this.c.generator.generate_all_legal_moves();
+            List<Move> child_nodes = this.mo.OrdereMoves(this.c.generator.generate_all_legal_moves());
             // leaf node is reached
             if (child_nodes.Count == 0)// draw or someone won
             {
@@ -768,7 +770,7 @@ namespace chess
         {
             if (depthleft == 0) return -this.c.Evaluate();
 
-            List<Move> child_nodes = this.c.generator.generate_all_legal_moves();
+            List<Move> child_nodes = this.mo.OrdereMoves(this.c.generator.generate_all_legal_moves());
             // leaf node is reached
             if (child_nodes.Count == 0)// draw or someone won
             {

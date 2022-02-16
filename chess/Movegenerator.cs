@@ -792,6 +792,58 @@ namespace chess
             return beta;
         }
 
+        //generate captured legal moves
+        private List<Move> getcapturesmoves()
+        {
+            return Generatelegalmovesfrompseudolegal(generate_psudo_legal_moves().FindAll(move => move.capturedpeace != null));
+        }
+        //minimax for captured moves
+        public int alphaBetaMaxcapture(int alpha, int beta)
+        {
+            int eval = this.c.Evaluate();
+            if (eval >= beta)
+                return beta;   // fail hard beta-cutoff
+            if (eval > alpha)
+                alpha = eval; // alpha acts like max in MiniMax
+            /////////////////
+
+            List<Move> child_nodes = this.mo.OrdereMoves(getcapturesmoves());
+
+            for (int i = 0; i < child_nodes.Count; i++)
+            {
+                this.c.manualy_makemove(child_nodes[i]);
+                int score = alphaBetaMincapture(alpha, beta);
+                this.c.unmakelastmove();
+                if (score >= beta)
+                    return beta;   // fail hard beta-cutoff
+                if (score > alpha)
+                    alpha = score; // alpha acts like max in MiniMax
+            }
+            return alpha;
+        }
+        public int alphaBetaMincapture(int alpha, int beta)
+        {
+            int eval = -this.c.Evaluate();
+            if (eval <= alpha)
+                return alpha; // fail hard alpha-cutoff
+            if (eval < beta)
+                beta = eval; // beta acts like min in MiniMax
+            //////////////////
+
+            List<Move> child_nodes = this.mo.OrdereMoves(getcapturesmoves());
+
+            for (int i = 0; i < child_nodes.Count; i++)
+            {
+                this.c.manualy_makemove(child_nodes[i]);
+                int score = alphaBetaMaxcapture(alpha, beta);
+                this.c.unmakelastmove();
+                if (score <= alpha)
+                    return alpha; // fail hard alpha-cutoff
+                if (score < beta)
+                    beta = score; // beta acts like min in MiniMax
+            }
+            return beta;
+        }
 
     }
 

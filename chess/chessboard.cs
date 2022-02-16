@@ -141,6 +141,8 @@ namespace chess
         //create an empty chess board and initialize it to beggining chess position 
         public chessboard()
         {
+
+            Console.WriteLine("done");
             initialize_objects();
 
             //create all of the pawns

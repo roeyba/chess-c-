@@ -710,14 +710,17 @@ namespace chess
         }
 
         //return the move the AI wants to play.
-        public Move choose_move(int depth) //the assamption is that the game isnt over yet
+        public Move choose_move(int depth, bool iswhite) //the assamption is that the game isnt over yet
         {
             //aplpha: the worst posible score for white - negative infinity
             //beta: the worst posible score for black - positive infinity
-            return alphaBetaMax_getmove(alpha : int.MinValue, beta : int.MaxValue, depth);
+            if (iswhite) { return alphaBetaMax_getmove(alpha: int.MinValue, beta: int.MaxValue, depth); }
+            //
+            //
+            return alphaBetaMin_getmove(alpha: int.MinValue, beta: int.MaxValue, depth);
         }
         
-        // a rapt function for minimx, return the optimal Move obj.
+        // a rapt functions for minimx, return the optimal Move obj.
         //minmax and alpha beta pruning.
         public Move alphaBetaMax_getmove(int alpha, int beta, int depth)
         {
@@ -727,14 +730,41 @@ namespace chess
 
             for (int i = 0; i < child_nodes.Count; i++)
             {
+                Console.WriteLine(child_nodes[i].print_in_notation());
                 this.c.manualy_makemove(child_nodes[i]);
                 int score = alphaBetaMin(alpha, beta, depth - 1);
+                Console.WriteLine("Score: " + score);
                 this.c.unmakelastmove();
                 if (score >= beta)
                     return child_nodes[i];   // fail hard beta-cutoff
                 if (score > alpha)
                 {
                     alpha = score; // alpha acts like max in MiniMax
+                    best_move = child_nodes[i];
+                }
+            }
+            return best_move;
+        }
+        public Move alphaBetaMin_getmove(int alpha, int beta, int depth)
+        {
+            //assuming deph>0 and there are at least one move to be made at that position
+            List<Move> child_nodes = this.mo.OrdereMoves(this.c.generator.generate_all_legal_moves());
+            Move best_move = new Move();
+
+            for (int i = 0; i < child_nodes.Count; i++)
+            {
+                if (child_nodes[i].startsquare == 2 && child_nodes[i].endsquare == 26)
+                    Console.WriteLine(child_nodes[i].to_mininal_string());
+                //Console.WriteLine(child_nodes[i].print_in_notation());
+                this.c.manualy_makemove(child_nodes[i]);
+                int score = alphaBetaMax(alpha, beta, depth - 1);
+                Console.WriteLine("Score: " + score);
+                this.c.unmakelastmove();
+                if (score <= alpha)
+                    return child_nodes[i];   // fail hard beta-cutoff
+                if (score < beta)
+                {
+                    beta = score; // alpha acts like max in MiniMax
                     best_move = child_nodes[i];
                 }
             }
@@ -768,7 +798,7 @@ namespace chess
         }
         public int alphaBetaMin(int alpha, int beta, int depthleft)
         {
-            if (depthleft == 0) return -this.c.Evaluate();
+            if (depthleft == 0) return this.c.Evaluate();
 
             List<Move> child_nodes = this.mo.OrdereMoves(this.c.generator.generate_all_legal_moves());
             // leaf node is reached
@@ -781,8 +811,10 @@ namespace chess
 
             for (int i = 0; i < child_nodes.Count; i++)
             {
+                Console.WriteLine(child_nodes[i].print_in_notation());
                 this.c.manualy_makemove(child_nodes[i]);
                 int score = alphaBetaMax(alpha, beta, depthleft - 1);
+                Console.WriteLine("Score: " + score);
                 this.c.unmakelastmove();
                 if (score <= alpha)
                     return alpha; // fail hard alpha-cutoff

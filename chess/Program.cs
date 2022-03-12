@@ -17,19 +17,19 @@ namespace chess
             Program p = new Program();
             //p.event_handler();
 
-            /*
-            string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ";
+            
+            string fen = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ";
             chessboard board = new chessboard(fen);
             Console.WriteLine("start position");
             board.printstatics();
 
-            fen = board.get_fen_notation();
-            int nodes = board.generator.Perft(5);
+            
+            int nodes = board.generator.Perft(4);
             Console.WriteLine(nodes+" leaf nodes");
 
             Console.WriteLine("end position");
-            Console.WriteLine(board.ToStringfromlist());
-            */
+            board.printstatics();
+            
 
             stopwatch.Stop(); Console.WriteLine("Elapsed Time is {0} seconds", (float)stopwatch.ElapsedMilliseconds/1000);
             Console.ReadLine();

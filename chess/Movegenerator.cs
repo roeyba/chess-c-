@@ -595,40 +595,28 @@ namespace chess
             List<Move> legalmoves = new List<Move>();
             foreach (Move tmpmove in pseudolegalmoves)
             {
-                c.manualy_makemove(tmpmove);
-                int king_pos;
-                if (this.c.whiteturn)
-                    king_pos = c.black_parts[Peace.King][0].position;
-                else
-                    king_pos = c.white_parts[Peace.King][0].position;
-
-                List<Move> nextmoves = generate_attacking_moves();
-                if (!nextmoves.Any(move => move.endsquare == king_pos))
+                c.manualy_makemove_without_switching_turns(tmpmove);
+                if (!this.c.current_player_king_in_check())
                 {
-                    if(tmpmove.edgecase == Move.castle) //if the movement is a castle, making sure the move is legal
+                    if (tmpmove.edgecase == Move.castle) //if the movement is a castle, making sure the move is legal
                     {
-                        int kingbeforecastling; //where the king is before moving at all
-                        if (this.c.whiteturn)
-                            kingbeforecastling = 4;
-                        else
-                            kingbeforecastling = 60;
-                        foreach (Move move in nextmoves)
-                        {//    if in check and want to castle        //castle right                                          //castle left
-                            if (move.endsquare == kingbeforecastling ||(king_pos % 8 == 6 && move.endsquare == king_pos - 1) || (king_pos % 8 == 2 && move.endsquare == king_pos + 1))
-                                goto LoopEnd;
-                        }
+                        if (this.c.pos_in_check(tmpmove.startsquare) ||
+                            (tmpmove.endsquare % 8 == 6 && this.c.pos_in_check(tmpmove.endsquare - 1)) ||
+                            (tmpmove.endsquare % 8 == 2 && this.c.pos_in_check(tmpmove.endsquare + 1))
+                            )
+                            goto End;
                     }
                     legalmoves.Add(tmpmove);
                 }
-                LoopEnd:
-                this.c.unmakelastmove();
+                End:
+                this.c.unmakelastmove_without_switching_turns();
             }
             return legalmoves;
         }
 
 
         //generate all of the moves where the player can attack at(not matter if there is a peace you can eat in those squers)
-        internal List<Move> generate_attacking_moves()
+        internal List<Move> Generate_attacking_moves()
         {//only used to make sure the gemerator makes only ligal moves.
 
             List<Move> moves = new List<Move>();

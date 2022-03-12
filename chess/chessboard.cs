@@ -333,13 +333,18 @@ namespace chess
                 return this.white_parts;
             return this.black_parts;
         }
-
+        
+        public void manualy_makemove(Move move) //make sure if its last move of the pawn that it is correct
+        {
+            manualy_makemove_without_switching_turns(move);
+            switchplayerturn();
+        }
         //take a move - not matter if the move eats a peace of the same color of the eater
         //takes a move - no matter whose turn to play it is!!!!
         //no matter if there is a peace from the same color in it!!!!
         //not chacking if the peace than need to move exist!!!
         //not cheking if the move is legal
-        public void manualy_makemove(Move move) //make sure if its last move of the pawn that it is correct
+        public void manualy_makemove_without_switching_turns(Move move) //make sure if its last move of the pawn that it is correct
         {
             int istartpo = get_i_pos(move.startsquare);
             int jstartpo = get_j_pos(move.startsquare);
@@ -431,7 +436,6 @@ namespace chess
                 addpeacetolist(this.board[iendpo, jendpo].Peace);
             }
             moves.Push(move);
-            switchplayerturn();
         }
         
         //changing the castling rights according to the peace than moved and its position and if you make move or unmaking it
@@ -482,9 +486,15 @@ namespace chess
                 }
             }
         }
-        
+
+        public void unmakelastmove() //make sure if its last move of the pawn that it is correct
+        {
+            unmakelastmove_without_switching_turns();
+            switchplayerturn();
+        }
+
         //return the chess board position back before the last move that has been made
-        public void unmakelastmove()
+        public void unmakelastmove_without_switching_turns()
         {
             Move move = this.moves.Pop();
 
@@ -561,7 +571,6 @@ namespace chess
                     }
                 }
             }
-            switchplayerturn();
         }
         
         public void manualy_makemove(string four_letters_position, int edgecase)
@@ -704,6 +713,8 @@ namespace chess
 
         public string get_all_played_moves(bool with_new_lines =true)
         {
+            if (this.moves.Count == 0)
+                return "no move has been played";
             string movesst = "";
             Stack<Move> tmpmoves = new Stack<Move>();
             while (this.moves.Count != 0)
@@ -729,22 +740,206 @@ namespace chess
             Console.WriteLine(this.get_fen_notation());
             Console.WriteLine(this.get_all_played_moves());
         }
-        
+
         //return if the current players turn king's is in check
+        //this fun check if the king is in check from the king's eye sight
         public Boolean current_player_king_in_check()
         {
-            bool ans = false;
-            int kingpos = this.get_current_player_list()[Peace.King][0].position;
-            this.switchplayerturn(); //so i could find out if the opponent attack the player
-            foreach (Move attackmove in generator.generate_attacking_moves()) //check if the king in check - therfore, checkmate/stalemate.
+            int k_pos;
+            if (whiteturn)
             {
-                if (attackmove.endsquare == kingpos)
+                k_pos = this.white_parts[Peace.King][0].position;
+            }
+            else
+            {
+                k_pos = this.black_parts[Peace.King][0].position;
+            }
+            return pos_in_check(get_i_pos(k_pos), get_j_pos(k_pos));
+        }
+        public Boolean pos_in_check(int pos)
+        {
+            return pos_in_check(get_i_pos(pos),get_j_pos(pos));
+        }
+        public Boolean pos_in_check(int i, int j)
+        {
+            int pc_type,t;
+            int[] op_knight_positions;
+            if (whiteturn)//white turn
+            {
+                op_knight_positions = new int[this.black_parts[Peace.Knight].Count];
+                for (t = 0; t < op_knight_positions.Length; t++)
+                    op_knight_positions[t] = this.black_parts[Peace.Knight][t].position;
+            }
+            else //black turn
+            {
+                op_knight_positions = new int[this.white_parts[Peace.Knight].Count];
+                for (t = 0; t < op_knight_positions.Length; t++)
+                    op_knight_positions[t] = this.white_parts[Peace.Knight][t].position;
+            }
+
+            //generate all the moves right_up to the peace
+            for (t = 1; t + j < chessboard.board_size && i - t >= 0; t++)
+            {
+                if (board[i - t, t + j].isocupied())
                 {
-                    ans= true; break;
+                    if (board[i - t, t + j].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[i - t, t + j].Peace.type;
+                        if (pc_type == Peace.Bishop || pc_type == Peace.Queen)
+                            return true;
+                        if (t == 1)
+                        {
+                            if (pc_type == Peace.King)
+                                return true;
+                            if (whiteturn && pc_type == Peace.Pawn)
+                                return true;
+                        }
+                    }
+                    break;
                 }
             }
-            switchplayerturn();
-            return ans;
+
+            //generate all the moves left_down to the peace
+            for (t = 1; j - t >= 0 && t + i < chessboard.board_size; t++)
+            {
+                if (board[t + i, j - t].isocupied())
+                {
+                    if (board[t + i, j - t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[t + i, j - t].Peace.type;
+                        if (pc_type == Peace.Bishop || pc_type == Peace.Queen)
+                            return true;
+                        if (t == 1)
+                        {
+                            if (pc_type == Peace.King)
+                                return true;
+                            if (whiteturn == false && pc_type == Peace.Pawn)
+                                return true;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            //generate all the moves left_up to the peace
+            for (t = 1; j - t >= 0 && i - t >= 0; t++)
+            {
+                if (board[i - t, j - t].isocupied())
+                {
+                    if (board[i - t, j - t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[i - t, j - t].Peace.type;
+                        if (pc_type == Peace.Bishop || pc_type == Peace.Queen)
+                            return true;
+                        if (t == 1)
+                        {
+                            if (pc_type == Peace.King)
+                                return true;
+                            if (whiteturn && pc_type == Peace.Pawn)
+                                return true;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            //generate all the moves right_down to the peace
+            for (t = 1; t + j < chessboard.board_size && t + i < chessboard.board_size; t++)
+            {
+                if (board[i + t, j + t].isocupied())
+                {
+                    if (board[i + t, j + t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[i + t, j + t].Peace.type;
+                        if (pc_type == Peace.Bishop || pc_type == Peace.Queen)
+                            return true;
+                        if (t == 1)
+                        {
+                            if (pc_type == Peace.King)
+                                return true;
+                            if (whiteturn == false && pc_type == Peace.Pawn)
+                                return true;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            ////////////////////////////////////////////////////////////vertical movement
+            //generate all the moves right to the peace
+            for (t = j + 1; t < chessboard.board_size; t++)
+            {
+                if (board[i, t].isocupied())
+                {
+                    if (board[i, t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[i, t].Peace.type;
+                        if (pc_type == Peace.Rook || pc_type == Peace.Queen)
+                            return true;
+                        if (pc_type == Peace.King && t == j + 1)
+                            return true;
+                    }
+                    break;
+                }
+
+            }
+
+            //generate all the moves left to the peace
+            for (t = j - 1; t >= 0; t--)
+            {
+                if (board[i, t].isocupied())
+                {
+                    if (board[i, t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[i, t].Peace.type;
+                        if (pc_type == Peace.Rook || pc_type == Peace.Queen)
+                            return true;
+                        if (pc_type == Peace.King && t == j - 1)
+                            return true;
+                    }
+                    break;
+                }
+            }
+
+            //generate all the moves down the peace
+            for (t = i + 1; t < chessboard.board_size; t++)
+            {
+                if (board[t, j].isocupied())
+                {
+                    if (board[t, j].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[t, j].Peace.type;
+                        if (pc_type == Peace.Rook || pc_type == Peace.Queen)
+                            return true;
+                        if (pc_type == Peace.King && t == i + 1)
+                            return true;
+                    }
+                    break;
+                }
+            }
+
+            //generate all the moves on top of the peace
+            for (t = i - 1; t >= 0; t--)
+            {
+                if (board[t, j].isocupied())
+                {
+                    if (board[t, j].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[t, j].Peace.type;
+                        if (pc_type == Peace.Rook || pc_type == Peace.Queen)
+                            return true;
+                        if (pc_type == Peace.King && t == i - 1)
+                            return true;
+                    }
+                    break;
+                }
+            }
+            for (t = 0; t < op_knight_positions.Length; t++)
+            {
+                if (i != get_i_pos(op_knight_positions[t]) && j != get_j_pos(op_knight_positions[t]) && (Math.Abs(i - get_i_pos(op_knight_positions[t])) + Math.Abs(j - get_j_pos(op_knight_positions[t])) == 3))
+                    return true;
+            }
+            return false;
         }
 
         //return if the king moved at least once sience the beggining of the game.

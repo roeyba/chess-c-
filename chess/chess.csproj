@@ -53,6 +53,7 @@
     <Compile Include="types of peaces\King.cs" />
     <Compile Include="types of peaces\Knight.cs" />
     <Compile Include="types of peaces\Pawn.cs" />
+    <Compile Include="PositionEval.cs" />
     <Compile Include="types of peaces\Queen.cs" />
     <Compile Include="types of peaces\Rook.cs" />
   </ItemGroup>

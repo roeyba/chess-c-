@@ -730,10 +730,10 @@ namespace chess
 
             for (int i = 0; i < child_nodes.Count; i++)
             {
-                Console.WriteLine(child_nodes[i].print_in_notation());
+                //Console.WriteLine(child_nodes[i].print_in_notation());
                 this.c.manualy_makemove(child_nodes[i]);
                 int score = alphaBetaMin(alpha, beta, depth - 1);
-                Console.WriteLine("Score: " + score);
+                //Console.WriteLine("Score: " + score);
                 this.c.unmakelastmove();
                 if (score >= beta)
                     return child_nodes[i];   // fail hard beta-cutoff
@@ -753,12 +753,10 @@ namespace chess
 
             for (int i = 0; i < child_nodes.Count; i++)
             {
-                if (child_nodes[i].startsquare == 2 && child_nodes[i].endsquare == 26)
-                    Console.WriteLine(child_nodes[i].to_mininal_string());
                 //Console.WriteLine(child_nodes[i].print_in_notation());
                 this.c.manualy_makemove(child_nodes[i]);
                 int score = alphaBetaMax(alpha, beta, depth - 1);
-                Console.WriteLine("Score: " + score);
+                //Console.WriteLine("Score: " + score);
                 this.c.unmakelastmove();
                 if (score <= alpha)
                     return child_nodes[i];   // fail hard beta-cutoff
@@ -811,10 +809,10 @@ namespace chess
 
             for (int i = 0; i < child_nodes.Count; i++)
             {
-                Console.WriteLine(child_nodes[i].print_in_notation());
+                //Console.WriteLine(child_nodes[i].print_in_notation());
                 this.c.manualy_makemove(child_nodes[i]);
                 int score = alphaBetaMax(alpha, beta, depthleft - 1);
-                Console.WriteLine("Score: " + score);
+                //Console.WriteLine("Score: " + score);
                 this.c.unmakelastmove();
                 if (score <= alpha)
                     return alpha; // fail hard alpha-cutoff

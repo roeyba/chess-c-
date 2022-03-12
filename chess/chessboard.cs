@@ -46,6 +46,7 @@ namespace chess
         public Boolean[] can_castle = { true, true, true , true, true, true }; // white all, white left , white right, black all , black left , black right, ||before got eaten: white left, white right, black left , black right                               
         public Boolean whiteturn = true;// true is white and false is black
         public Movegenerator generator;
+        public PositionEval Position_evaluatior;
 
         /*   (i)matrix representations
          *      +---+---+---+---+---+---+---+---+
@@ -133,6 +134,9 @@ namespace chess
             // in a chess game every side can only have 8 pawns
             this.white_parts[0].Capacity = 8;
             this.black_parts[0].Capacity = 8;
+
+            //create the position evaluator
+            this.Position_evaluatior = new PositionEval(this);
 
             //create the move generator
             generator = new Movegenerator(this);
@@ -772,23 +776,9 @@ namespace chess
             return letters[get_j_pos(position)];
         }
 
-        //*this evaltuation is relative to the player that makes the move:
-        //cases:
-        //Evaluate()==0  => the position is equal.
-        //Evaluate()>0   => the side who's turn it is to move is doing better.
-        //Evaluate()<0   => the other side is doing better.
         public int Evaluate()
-        {//doesnt ivaluate checkmates and draws.
-            int diff_count=0;
-            diff_count += (this.white_parts[Peace.Pawn].Count   - this.black_parts[Peace.Pawn].Count)   * Peace.Pawn_value;
-            diff_count += (this.white_parts[Peace.Knight].Count - this.black_parts[Peace.Knight].Count) * Peace.Knight_value;
-            diff_count += (this.white_parts[Peace.Bishop].Count - this.black_parts[Peace.Bishop].Count) * Peace.Bishop_value;
-            diff_count += (this.white_parts[Peace.Rook].Count   - this.black_parts[Peace.Rook].Count)   * Peace.Rook_value;
-            diff_count += (this.white_parts[Peace.Queen].Count  - this.black_parts[Peace.Queen].Count)  * Peace.Queen_value;
-
-            //int prespective= (this.whiteturn) ? 1 : -1; //1 if its white turn, -1 if it its black turn.
-            //return diff_count * prespective;
-            return diff_count;
+        {
+            return this.Position_evaluatior.Evaluate();
         }
     }
 }

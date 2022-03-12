@@ -9,11 +9,12 @@ namespace chess
     public class Peace
     {
         //const is unchangeble variable and it's static
-        public const int Pawn   = 0; public const int Pawn_value = 1;
-        public const int Knight = 1; public const int Knight_value = 3;
-        public const int Bishop = 2; public const int Bishop_value = 3;
-        public const int Rook   = 3; public const int Rook_value = 5;
-        public const int Queen  = 4; public const int Queen_value = 9;
+        //all of the values are in centipawns https://www.chessprogramming.org/Centipawns
+        public const int Pawn   = 0; public const int Pawn_value = 100;
+        public const int Knight = 1; public const int Knight_value = 320;
+        public const int Bishop = 2; public const int Bishop_value = 330;
+        public const int Rook   = 3; public const int Rook_value = 500;
+        public const int Queen  = 4; public const int Queen_value = 900;
         public const int King   = 5; //public const int King_value = 99999;
         public int type;
         public bool iswhite;

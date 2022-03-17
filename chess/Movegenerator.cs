@@ -592,6 +592,34 @@ namespace chess
         //gets a list of pseudo-legal moves and return a list with all of the legal moves in this list
         private List<Move> Generatelegalmovesfrompseudolegal(List<Move> pseudolegalmoves)
         {
+            int king_pos = this.c.get_king_pos(this.c.whiteturn);
+            if (this.c.there_arent_attacks_or_pins(chessboard.get_i_pos(king_pos), chessboard.get_j_pos(king_pos))) //making sure king movement is ok
+            {
+                for(int i = pseudolegalmoves.Count-1; i > 0; i--)//the king movements are at the end of the pseudolegalmoves list
+                {
+                    if(pseudolegalmoves[i].startsquare == king_pos)
+                    {
+                        c.manualy_makemove_without_switching_turns(pseudolegalmoves[i]);
+                        if (this.c.current_player_king_in_check())
+                        {
+                            pseudolegalmoves.Remove(pseudolegalmoves[i]);//might be problematic
+                            
+                        }
+                        else if (pseudolegalmoves[i].edgecase == Move.castle) //if the movement is a castle, making sure the move is legal
+                        {
+                            if (this.c.pos_in_check(pseudolegalmoves[i].startsquare) ||
+                                (pseudolegalmoves[i].endsquare % 8 == 6 && this.c.pos_in_check(pseudolegalmoves[i].endsquare - 1)) ||
+                                (pseudolegalmoves[i].endsquare % 8 == 2 && this.c.pos_in_check(pseudolegalmoves[i].endsquare + 1))
+                                )
+                                pseudolegalmoves.Remove(pseudolegalmoves[i]);//might be problematic
+                        }
+                        this.c.unmakelastmove_without_switching_turns();
+                    }
+                    //else
+                        //return pseudolegalmoves;
+                }
+                return pseudolegalmoves;//
+            }
             List<Move> legalmoves = new List<Move>();
             foreach (Move tmpmove in pseudolegalmoves)
             {

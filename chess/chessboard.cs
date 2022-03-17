@@ -745,15 +745,7 @@ namespace chess
         //this fun check if the king is in check from the king's eye sight
         public Boolean current_player_king_in_check()
         {
-            int k_pos;
-            if (whiteturn)
-            {
-                k_pos = this.white_parts[Peace.King][0].position;
-            }
-            else
-            {
-                k_pos = this.black_parts[Peace.King][0].position;
-            }
+            int k_pos = get_king_pos(whiteturn);
             return pos_in_check(get_i_pos(k_pos), get_j_pos(k_pos));
         }
         public Boolean pos_in_check(int pos)
@@ -942,12 +934,231 @@ namespace chess
             return false;
         }
 
+        //if there are no pins or attacks all of the psudo legal moves are also legal
+        public bool there_arent_attacks_or_pins(int i_king_pos, int j_king_pos)
+        {
+            int pc_type, t;
+            int[] op_knight_positions;
+            int defenders=0;
+
+            //generate all the moves right_up to the peace
+            for (t = 1; t + j_king_pos < chessboard.board_size && i_king_pos - t >= 0; t++)
+            {
+                if (board[i_king_pos - t, t + j_king_pos].isocupied())
+                {
+                    if (board[i_king_pos - t, t + j_king_pos].Peace.iswhite != whiteturn) //oponent peace
+                    {
+                        pc_type = board[i_king_pos - t, t + j_king_pos].Peace.type;
+                        if ((pc_type == Peace.Bishop || pc_type == Peace.Queen)&& defenders <= 1)
+                            return false;
+                        if (t == 1)
+                        {
+                            if (pc_type == Peace.King)
+                                return false;
+                            if (whiteturn && pc_type == Peace.Pawn)
+                                return false;
+                        }
+                    }
+                    if (defenders == 1)
+                        break;
+                    else
+                        defenders++;
+                }
+            }
+            defenders = 0;
+            //generate all the moves left_down to the peace
+            for (t = 1; j_king_pos - t >= 0 && t + i_king_pos < chessboard.board_size; t++)
+            {
+                if (board[t + i_king_pos, j_king_pos - t].isocupied())
+                {
+                    if (board[t + i_king_pos, j_king_pos - t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[t + i_king_pos, j_king_pos - t].Peace.type;
+                        if ((pc_type == Peace.Bishop || pc_type == Peace.Queen)&& defenders <= 1)
+                            return false;
+                        if (t == 1)
+                        {
+                            if (pc_type == Peace.King)
+                                return false;
+                            if (whiteturn == false && pc_type == Peace.Pawn)
+                                return false;
+                        }
+                    }
+                    if (defenders == 1)
+                        break;
+                    else
+                        defenders++;
+                }
+            }
+            defenders = 0;
+            //generate all the moves left_up to the peace
+            for (t = 1; j_king_pos - t >= 0 && i_king_pos - t >= 0; t++)
+            {
+                if (board[i_king_pos - t, j_king_pos - t].isocupied())
+                {
+                    if (board[i_king_pos - t, j_king_pos - t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[i_king_pos - t, j_king_pos - t].Peace.type;
+                        if ((pc_type == Peace.Bishop || pc_type == Peace.Queen)&& defenders <= 1)
+                            return false;
+                        if (t == 1)
+                        {
+                            if (pc_type == Peace.King)
+                                return false;
+                            if (whiteturn && pc_type == Peace.Pawn)
+                                return false;
+                        }
+                    }
+                    if (defenders == 1)
+                        break;
+                    else
+                        defenders++;
+                }
+            }
+            defenders = 0;
+            //generate all the moves right_down to the peace
+            for (t = 1; t + j_king_pos < chessboard.board_size && t + i_king_pos < chessboard.board_size; t++)
+            {
+                if (board[i_king_pos + t, j_king_pos + t].isocupied())
+                {
+                    if (board[i_king_pos + t, j_king_pos + t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[i_king_pos + t, j_king_pos + t].Peace.type;
+                        if ((pc_type == Peace.Bishop || pc_type == Peace.Queen)&& defenders <= 1)
+                            return false;
+                        if (t == 1)
+                        {
+                            if (pc_type == Peace.King)
+                                return false;
+                            if (whiteturn == false && pc_type == Peace.Pawn)
+                                return false;
+                        }
+                    }
+                    if (defenders == 1)
+                        break;
+                    else
+                        defenders++;
+                }
+            }
+            defenders = 0;
+            ////////////////////////////////////////////////////////////vertical movement
+            //generate all the moves right to the peace
+            for (t = j_king_pos + 1; t < chessboard.board_size; t++)
+            {
+                if (board[i_king_pos, t].isocupied())
+                {
+                    if (board[i_king_pos, t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[i_king_pos, t].Peace.type;
+                        if ((pc_type == Peace.Rook || pc_type == Peace.Queen)&& defenders <= 1)
+                            return false;
+                        if (pc_type == Peace.King && t == j_king_pos + 1)
+                            return false;
+                    }
+                    if (defenders == 1)
+                        break;
+                    else
+                        defenders++;
+                }
+
+            }
+            defenders = 0;
+            //generate all the moves left to the peace
+            for (t = j_king_pos - 1; t >= 0; t--)
+            {
+                if (board[i_king_pos, t].isocupied())
+                {
+                    if (board[i_king_pos, t].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[i_king_pos, t].Peace.type;
+                        if ((pc_type == Peace.Rook || pc_type == Peace.Queen)&& defenders <= 1)
+                            return false;
+                        if (pc_type == Peace.King && t == j_king_pos - 1)
+                            return false;
+                    }
+                    if (defenders == 1)
+                        break;
+                    else
+                        defenders++;
+                }
+            }
+            defenders = 0;
+            //generate all the moves down the peace
+            for (t = i_king_pos + 1; t < chessboard.board_size; t++)
+            {
+                if (board[t, j_king_pos].isocupied())
+                {
+                    if (board[t, j_king_pos].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[t, j_king_pos].Peace.type;
+                        if ((pc_type == Peace.Rook || pc_type == Peace.Queen)&& defenders <= 1)
+                            return false;
+                        if (pc_type == Peace.King && t == i_king_pos + 1)
+                            return false;
+                    }
+                    if (defenders == 1)
+                        break;
+                    else
+                        defenders++;
+                }
+            }
+            defenders = 0;
+            //generate all the moves on top of the peace
+            for (t = i_king_pos - 1; t >= 0; t--)
+            {
+                if (board[t, j_king_pos].isocupied())
+                {
+                    if (board[t, j_king_pos].Peace.iswhite != whiteturn)
+                    {
+                        pc_type = board[t, j_king_pos].Peace.type;
+                        if ((pc_type == Peace.Rook || pc_type == Peace.Queen)&& defenders <= 1)
+                            return false;
+                        if (pc_type == Peace.King && t == i_king_pos - 1)
+                            return false;
+                    }
+                    if (defenders == 1)
+                        break;
+                    else
+                        defenders++;
+                }
+            }
+            if (whiteturn)//white turn
+            {
+                op_knight_positions = new int[this.black_parts[Peace.Knight].Count];
+                for (t = 0; t < op_knight_positions.Length; t++)
+                    op_knight_positions[t] = this.black_parts[Peace.Knight][t].position;
+            }
+            else //black turn
+            {
+                op_knight_positions = new int[this.white_parts[Peace.Knight].Count];
+                for (t = 0; t < op_knight_positions.Length; t++)
+                    op_knight_positions[t] = this.white_parts[Peace.Knight][t].position;
+            }
+            for (t = 0; t < op_knight_positions.Length; t++)
+            {
+                if (i_king_pos != get_i_pos(op_knight_positions[t]) && j_king_pos != get_j_pos(op_knight_positions[t]) && (Math.Abs(i_king_pos - get_i_pos(op_knight_positions[t])) + Math.Abs(j_king_pos - get_j_pos(op_knight_positions[t])) == 3))
+                    return false;
+            }
+            return true;
+        }
+
         //return if the king moved at least once sience the beggining of the game.
         public bool kingdidntmoved(bool iswhite)
         {// check if the king of that peace didnt move from there position once.
             if (iswhite)
                 return this.can_castle[0];
             return this.can_castle[3];
+        }
+        public int get_king_pos(bool iswhite)
+        {// get the position of the king with the input color
+            if (whiteturn)
+            {
+                return this.white_parts[Peace.King][0].position;
+            }
+            else
+            {
+                return this.black_parts[Peace.King][0].position;
+            }
         }
 
         public int getoffset(bool iswhite)

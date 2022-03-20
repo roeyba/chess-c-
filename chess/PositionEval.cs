@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace chess.types_of_peaces
@@ -16,6 +17,12 @@ namespace chess.types_of_peaces
         {
             this.white_parts = chessboard.white_parts;
             this.black_parts = chessboard.black_parts;
+            mg = new int[2];
+            eg = new int[2];
+            mg[0] = 0;  //white middle game score
+            mg[1] = 0;  //black middle game score
+            eg[0] = 0;  //white end game score
+            eg[1] = 0;  //black end game score
             Init_tables();
         }
         
@@ -171,14 +178,18 @@ namespace chess.types_of_peaces
             eg_king_table
         };
 
-        private static readonly int[] gamephaseInc = { 0, 1, 1, 2, 4, 0 };
-        private static readonly int[] mg_value = { 82, 337, 365, 477, 1025, 0 };
-        private static readonly int[] eg_value = { 94, 281, 297, 512,  936, 0 };
+        private static readonly int[] gamephaseInc = { 0, 1, 1, 2, 4, 0 }; //the importence of the peace in a chess game
+        private static readonly int[] mg_value = { 82, 337, 365, 477, 1025, 0 };//the value of eace peace in the middle game
+        private static readonly int[] eg_value = { 94, 281, 297, 512,  936, 0 };//the value of eace peace in the middle endgame
 
 
         private int[,] mg_table;
         private int[,] eg_table;
-        
+
+        private int[] mg;//holds the score in the middle game faze
+        private int[] eg;//holds the score in the end game faze
+        private int gamephase;
+
         //init the overall score each peace gets in every place on the board and in any game phase.
         void Init_tables()
         {
@@ -190,6 +201,8 @@ namespace chess.types_of_peaces
                 for (sq = 0; sq < 64; sq++) {
                     mg_table[pc_kind,sq] = mg_value[peace] + mg_pesto_table[peace][sq];
                     eg_table[pc_kind,sq] = eg_value[peace] + eg_pesto_table[peace][sq];
+
+                    //create mirrored tables for black
                     mg_table[pc_kind+1,sq] = mg_value[peace] + mg_pesto_table[peace][sq ^ 56];
                     eg_table[pc_kind+1,sq] = eg_value[peace] + eg_pesto_table[peace][sq ^ 56];
                     // ^ bit opperator
@@ -205,43 +218,37 @@ namespace chess.types_of_peaces
         //Evaluate()==0  => the position is equal.
         //Evaluate()>0   => white is doing better.// no matter which players turn it is!
         //Evaluate()<0   => black is doing better.// no matter which players turn it is!
-        //doesnt ivaluate checkmates and draws.
+        //doesnt ivaluate checkmates and draws correctly intentialy.
         //this evaluataion is used after the opening faze of the game
         public int Evaluate()
         {
-            int[] mg = new int[2];
-            int[] eg = new int[2];
-            int gamePhase = 0;
+            gamephase = 0;
 
-            mg[0] = 0;//white middle game score
-            mg[1] = 0;//black middle game score
-            eg[0] = 0;//white end game score
-            eg[1] = 0;//black end game score
+            mg[0] = 0;  //white middle game score
+            mg[1] = 0;  //black middle game score
+            eg[0] = 0;  //white end game score
+            eg[1] = 0;  //black end game score
 
             /* evaluate each piece */
             for(int pctype=0; pctype<chessboard.peaces_types_amount; pctype++)
             {
                 foreach(Peace peace in white_parts[pctype])//white scores
                 {
-                    mg[0] += mg_table[peace.type * 2, peace.position];
-                    eg[0] += eg_table[peace.type * 2, peace.position];
-                    gamePhase += gamephaseInc[peace.type];
+                    new Thread(() => update_white_peace(peace)).Start();
                 }
                 foreach (Peace peace in black_parts[pctype])//black scores
                 {
-                    mg[1] += mg_table[peace.type * 2 + 1, peace.position];
-                    eg[1] += eg_table[peace.type * 2 + 1, peace.position];
-                    gamePhase += gamephaseInc[peace.type];
+                    new Thread(() => update_black_peace(peace)).Start();
                 }
             }
 
             /* tapered eval */
             int mgScore = mg[0] - mg[1];//white - black
             int egScore = eg[0] - eg[1];
-            int mgPhase = gamePhase;
+            int mgPhase = gamephase;
             if (mgPhase > 24) /* in case of early promotion */
                 mgPhase = 24;
-            int egPhase = 24 - mgPhase;//since 24 is the max value the egphase is the rest of the value
+            int egPhase = 24 - mgPhase;//since 24 is the max value, egphase is the rest of the value
             return (mgScore * mgPhase + egScore * egPhase) / 24;
             /*
              * add:
@@ -251,6 +258,21 @@ namespace chess.types_of_peaces
              * -making sure the eval works in endgames
              * 
              */
+        }
+
+
+        //invoke the variables
+        private void update_white_peace(Peace peace)
+        {
+            mg[0] += mg_table[peace.type * 2, peace.position];
+            eg[0] += eg_table[peace.type * 2, peace.position];
+            gamephase += gamephaseInc[peace.type];
+        }
+        private void update_black_peace(Peace peace)
+        {
+            mg[1] += mg_table[peace.type * 2 + 1, peace.position];
+            eg[1] += eg_table[peace.type * 2 + 1, peace.position];
+            gamephase += gamephaseInc[peace.type];
         }
 
     }

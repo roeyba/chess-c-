@@ -16,7 +16,7 @@ namespace chess
 
         public Move_list_ordering(chessboard board)
         {
-            this.Scores = new int[218];//this is the maximum posible legal moves in a single position.
+            this.Scores = new int[218];//this is the maximum posible legal moves in a single position.(most of the time there would be about 30 moves - for each one one score)
             this.chessboard = board;
         }
 
@@ -62,13 +62,7 @@ namespace chess
             else
             {
                 // Penalize moving piece to a square attacked by opponent pawn
-                // I need to check if the square is attacked by the opponent (using attack grid). implement that and than do this part
 
-                /*
-				if (BitBoardUtility.ContainsSquare (moveGenerator.opponentPawnAttackMap, moves[i].TargetSquare)) {
-					score -= squareControlledByOpponentPawnPenalty;
-				}
-                */
             }
             return score;
         }

@@ -24,8 +24,10 @@ namespace chess
             board.printstatics();
 
             
-            int nodes = board.generator.Perft(5);
-            Console.WriteLine(nodes+" leaf nodes");
+            //int nodes = board.generator.Perft(5);
+            //Console.WriteLine(nodes+" leaf nodes");
+            Move best_move = board.generator.choose_move(depth: 6,board.whiteturn);
+            Console.WriteLine(best_move.to_mininal_string());
 
             Console.WriteLine("end position");
             board.printstatics();

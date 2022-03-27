@@ -9,14 +9,15 @@ namespace chess.types_of_peaces
 {
     public class PositionEval
     {
-
-        internal readonly List<Peace>[] white_parts;
-        internal readonly List<Peace>[] black_parts;
+        internal readonly List<Peace>[][] parts;
 
         public PositionEval(chessboard chessboard)
         {
-            this.white_parts = chessboard.white_parts;
-            this.black_parts = chessboard.black_parts;
+            parts = new List<Peace>[2][];
+
+            this.parts[white] = chessboard.white_parts;
+            this.parts[black] = chessboard.black_parts;
+
             mg = new int[2];
             eg = new int[2];
             mg[0] = 0;  //white middle game score
@@ -25,7 +26,10 @@ namespace chess.types_of_peaces
             eg[1] = 0;  //black end game score
             Init_tables();
         }
-        
+
+        private const int white = 0;
+        private const int black = 1;
+
         private static readonly int[] mg_pawn_table = {
               0,   0,   0,   0,   0,   0,  0,   0,
              98, 134,  61,  95,  68, 126, 34, -11,
@@ -182,9 +186,8 @@ namespace chess.types_of_peaces
         private static readonly int[] mg_value = { 82, 337, 365, 477, 1025, 0 };//the value of eace peace in the middle game
         private static readonly int[] eg_value = { 94, 281, 297, 512,  936, 0 };//the value of eace peace in the middle endgame
 
-
-        private int[,] mg_table;
-        private int[,] eg_table;
+        private int[][,] mg_table;
+        private int[][,] eg_table;
 
         private int[] mg;//holds the score in the middle game faze
         private int[] eg;//holds the score in the end game faze
@@ -193,18 +196,19 @@ namespace chess.types_of_peaces
         //init the overall score each peace gets in every place on the board and in any game phase.
         void Init_tables()
         {
-            this.mg_table = new int[12, 64];
-            this.eg_table = new int[12, 64];
-            int pc_kind, peace;
+            //types of peaces *2 , squere location on the board
+            this.mg_table = new int[2][,]; this.mg_table[white] = new int[6, 64]; this.mg_table[black] = new int[6, 64];
+            this.eg_table = new int[2][,]; this.eg_table[white] = new int[6, 64]; this.eg_table[black] = new int[6, 64];
+            int peace;
             uint sq;
-            for (peace = Peace.Pawn, pc_kind = 0; peace <= Peace.King; pc_kind += 2, peace++) {
+            for (peace = Peace.Pawn; peace <= Peace.King; peace++) {
                 for (sq = 0; sq < 64; sq++) {
-                    mg_table[pc_kind,sq] = mg_value[peace] + mg_pesto_table[peace][sq];
-                    eg_table[pc_kind,sq] = eg_value[peace] + eg_pesto_table[peace][sq];
+                    mg_table[white][peace,sq] = mg_value[peace] + mg_pesto_table[peace][sq];
+                    eg_table[white][peace, sq] = eg_value[peace] + eg_pesto_table[peace][sq];
 
                     //create mirrored tables for black
-                    mg_table[pc_kind+1,sq] = mg_value[peace] + mg_pesto_table[peace][sq ^ 56];
-                    eg_table[pc_kind+1,sq] = eg_value[peace] + eg_pesto_table[peace][sq ^ 56];
+                    mg_table[black][peace, sq] = mg_value[peace] + mg_pesto_table[peace][sq ^ 56];
+                    eg_table[black][peace, sq] = eg_value[peace] + eg_pesto_table[peace][sq ^ 56];
                     // ^ bit opperator
                     //10011
                     //00101
@@ -224,27 +228,29 @@ namespace chess.types_of_peaces
         {
             gamephase = 0;
 
-            mg[0] = 0;  //white middle game score
-            mg[1] = 0;  //black middle game score
-            eg[0] = 0;  //white end game score
-            eg[1] = 0;  //black end game score
+            mg[white] = 0;  //white middle game score
+            mg[black] = 0;  //black middle game score
+            eg[white] = 0;  //white end game score
+            eg[black] = 0;  //black end game score
 
             /* evaluate each piece */
-            for(int pctype=0; pctype<chessboard.peaces_types_amount; pctype++)
+            Parallel.For(white, 2, (color) =>
             {
-                foreach(Peace peace in white_parts[pctype])//white scores
+                for (int pctype = Peace.Pawn; pctype < chessboard.peaces_types_amount; pctype++)
                 {
-                    new Thread(() => update_white_peace(peace)).Start();
+                    foreach (Peace peace in parts[color][pctype])//one color scores
+                    {
+                        Interlocked.Add(ref mg[color], mg_table[color][peace.type, peace.position]);
+                        Interlocked.Add(ref eg[color], eg_table[color][peace.type, peace.position]);
+                        Interlocked.Add(ref gamephase, gamephaseInc[peace.type]);
+                    }
                 }
-                foreach (Peace peace in black_parts[pctype])//black scores
-                {
-                    new Thread(() => update_black_peace(peace)).Start();
-                }
-            }
+            });
+
 
             /* tapered eval */
-            int mgScore = mg[0] - mg[1];//white - black
-            int egScore = eg[0] - eg[1];
+            int mgScore = mg[white] - mg[black];
+            int egScore = eg[white] - eg[black];
             int mgPhase = gamephase;
             if (mgPhase > 24) /* in case of early promotion */
                 mgPhase = 24;
@@ -260,19 +266,12 @@ namespace chess.types_of_peaces
              */
         }
 
-
         //invoke the variables
-        private void update_white_peace(Peace peace)
+        private void update_peace(Peace peace, int color)
         {
-            mg[0] += mg_table[peace.type * 2, peace.position];
-            eg[0] += eg_table[peace.type * 2, peace.position];
-            gamephase += gamephaseInc[peace.type];
-        }
-        private void update_black_peace(Peace peace)
-        {
-            mg[1] += mg_table[peace.type * 2 + 1, peace.position];
-            eg[1] += eg_table[peace.type * 2 + 1, peace.position];
-            gamephase += gamephaseInc[peace.type];
+            Interlocked.Add(ref mg[color], mg_table[color][peace.type, peace.position]);
+            Interlocked.Add(ref eg[color], eg_table[color][peace.type, peace.position]);
+            Interlocked.Add(ref gamephase, gamephaseInc[peace.type]);
         }
 
     }

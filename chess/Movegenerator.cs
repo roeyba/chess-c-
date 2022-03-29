@@ -787,7 +787,7 @@ namespace chess
 
         public int alphaBetaMax(int alpha, int beta, int depthleft)
         {
-            if (depthleft == 0) return this.c.Evaluate();
+            if (depthleft == 0) return alphaBetaMincapture(alpha, beta);
 
             List<Move> child_nodes = this.mo.OrdereMoves(this.c.generator.generate_all_legal_moves());
             // leaf node is reached
@@ -812,7 +812,7 @@ namespace chess
         }
         public int alphaBetaMin(int alpha, int beta, int depthleft)
         {
-            if (depthleft == 0) return this.c.Evaluate();
+            if (depthleft == 0) return alphaBetaMincapture(alpha, beta);
 
             List<Move> child_nodes = this.mo.OrdereMoves(this.c.generator.generate_all_legal_moves());
             // leaf node is reached
@@ -843,6 +843,7 @@ namespace chess
         {
             return Generatelegalmovesfrompseudolegal(generate_psudo_legal_moves().FindAll(move => move.capturedpeace != null));
         }
+
         //minimax for captured moves
         public int alphaBetaMaxcapture(int alpha, int beta)
         {
@@ -869,7 +870,7 @@ namespace chess
         }
         public int alphaBetaMincapture(int alpha, int beta)
         {
-            int eval = -this.c.Evaluate();
+            int eval = this.c.Evaluate();
             if (eval <= alpha)
                 return alpha; // fail hard alpha-cutoff
             if (eval < beta)

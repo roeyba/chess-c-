@@ -1157,6 +1157,7 @@ namespace chess
             }
             else
             {
+                //printstatics();
                 return this.black_parts[Peace.King][0].position;
             }
         }

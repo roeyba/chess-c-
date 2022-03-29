@@ -18,16 +18,16 @@ namespace chess
             //p.event_handler();
 
             
-            string fen = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
+            string fen = "8/8/8/5k2/7P/3r1P2/4R2K/8 b - ";
             chessboard board = new chessboard(fen);
             Console.WriteLine("start position");
             board.printstatics();
 
             
-            //int nodes = board.generator.Perft(5);
-            //Console.WriteLine(nodes+" leaf nodes");
-            Move best_move = board.generator.choose_move(depth: 6,board.whiteturn);
-            Console.WriteLine(best_move.to_mininal_string());
+            int nodes = board.generator.Perft(2);
+            Console.WriteLine(nodes+" leaf nodes");
+            //Move best_move = board.generator.choose_move(depth: 1,board.whiteturn);
+            //Console.WriteLine(best_move.to_mininal_string());
 
             Console.WriteLine("end position");
             board.printstatics();

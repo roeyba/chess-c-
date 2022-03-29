@@ -32,6 +32,7 @@ namespace chess
             capturedpeace = null;
             this.edgecase = edgecase_num;
         }
+        public const int None_edgcase = 0;
         public const int pawn_promote_to_knight = 1;
         public const int pawn_promote_to_bishop = 2;
         public const int pawn_promote_to_rook = 3;
@@ -595,7 +596,7 @@ namespace chess
             int king_pos = this.c.get_king_pos(this.c.whiteturn);
             if (this.c.there_arent_attacks_or_pins(chessboard.get_i_pos(king_pos), chessboard.get_j_pos(king_pos))) //making sure king movement is ok
             {
-                for(int i = pseudolegalmoves.Count-1; i > 0; i--)//the king movements are at the end of the pseudolegalmoves list
+                for(int i = pseudolegalmoves.Count-1; i >= 0; i--)//the king movements are at the end of the pseudolegalmoves list
                 {
                     if(pseudolegalmoves[i].startsquare == king_pos)
                     {

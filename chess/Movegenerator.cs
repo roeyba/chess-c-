@@ -616,8 +616,8 @@ namespace chess
                         }
                         this.c.unmakelastmove_without_switching_turns();
                     }
-                    //else
-                        //return pseudolegalmoves;
+                    else
+                        return pseudolegalmoves;
                 }
                 return pseudolegalmoves;//
             }

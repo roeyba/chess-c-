@@ -15,28 +15,30 @@ namespace chess
         public const int Bishop = 2; public const int Bishop_value = 330;
         public const int Rook   = 3; public const int Rook_value = 500;
         public const int Queen  = 4; public const int Queen_value = 900;
-        public const int King   = 5; //public const int King_value = 99999;
+        public const int King   = 5; //public const int King_value = 99999;//infinity
+        public const Byte white = 0;
+        public const Byte black = 1;
         public int type;
-        public bool iswhite;
+        public Byte color;
         public int position; // 0-63 number represent location, the count starts from left to right for each row from down to up
         //if a rook got eaten and needs to come back with the posibility to castle than his position = -1*position;
-        public Peace(bool iswhite, int position)
+        public Peace(Byte iswhite, int position)
         {
-            this.iswhite = iswhite;
+            this.color = iswhite;
             this.position = position;
         }
 
-        public Peace(bool iswhite, int position, int type)
+        public Peace(Byte iswhite, int position, int type)
         {
             this.type = type;
-            this.iswhite = iswhite;
+            this.color = iswhite;
             this.position = position;
         }
 
         //return string representation of all of the info about the peace
         override public string ToString()
         {
-            if(iswhite)
+            if(color == white)
                 return this.get_type_char_rep() + ", white, position:[" + this.get_i_pos() + "," + this.get_j_pos() + "]";
             else
                 return this.get_type_char_rep() + ", black, position:["+ this.get_i_pos() + ","+ this.get_j_pos() + "]";
@@ -47,30 +49,30 @@ namespace chess
             switch (this.type)
             {
                 case 0:
-                    if(iswhite)
+                    if(color == white)
                         return 'P';
                     return 'p';
                 case 1:
-                    if (iswhite)
+                    if (color == white)
                         return 'N';
                     return 'n';
                 //
                 case 2:
-                    if (iswhite)
+                    if (color == white)
                         return 'B';
                     return 'b';
                 case 3:
-                    if (iswhite)
+                    if (color == white)
                         return 'R';
                     return 'r';
                 //
                 case 4:
-                    if (iswhite)
+                    if (color == white)
                         return 'Q';
                     return 'q';
                 //
                 case 5:
-                    if (iswhite)
+                    if (color == white)
                         return 'K';
                     return 'k';
                     //
@@ -106,6 +108,19 @@ namespace chess
                     return Queen_value;
             }
             return int.MaxValue;
+        }
+
+        public bool is_white()
+        {
+            return color == white;
+            return (color & (1 << black)) != white; //check if the first bit in the byte is set
+            //black means it check the 0 position in the byte(the first position)
+        }
+        public bool is_black()
+        {
+            return color == black;
+            return (color & (1 << black)) != black; //check if the first bit in the byte is set
+            //black means it check the 0 position in the byte(the first position)
         }
 
     }

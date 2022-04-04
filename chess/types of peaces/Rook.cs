@@ -8,7 +8,7 @@ namespace chess.types_of_peaces
 {
     class Rook : Peace
     {
-        public Rook(bool iswhitee, int position) : base(iswhitee, position)
+        public Rook(Byte iswhitee, int position) : base(iswhitee, position)
         {
             this.type = 3;
         }

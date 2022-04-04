@@ -8,7 +8,7 @@ namespace chess.types_of_peaces
 {
     class King : Peace
     {
-        public King(bool iswhitee, int position) : base(iswhitee, position)
+        public King(Byte iswhitee, int position) : base(iswhitee, position)
         {
             this.type = 5;
         }

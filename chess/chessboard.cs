@@ -27,7 +27,7 @@ namespace chess
         {
             if (isocupied())
             {
-                if (peace.iswhite != this.Peace.iswhite)
+                if (peace.color != this.Peace.color)
                     return true;
                 return false;
             }
@@ -41,10 +41,14 @@ namespace chess
         public const int peaces_types_amount = 6;
         public List<Peace>[] white_parts = new List<Peace>[peaces_types_amount]; // | 0pawns | 1knights | 2bishops | 3rooks | 4queens | 5king
         public List<Peace>[] black_parts = new List<Peace>[peaces_types_amount]; // | 0pawns | 1knights | 2bishops | 3rooks | 4queens | 5king
+        public List<Peace>[][] peaces;//this variable responsible for accesing all of the peaces
         public Tile[,] board = new Tile[board_size, board_size]; // 8x8 board that represent the chess board
         public Stack<Move> moves = new Stack<Move>(40); // in an average chess game there are 40 moves
         public Boolean[] can_castle = { true, true, true , true, true, true }; // white all, white left , white right, black all , black left , black right, ||before got eaten: white left, white right, black left , black right                               
-        public Boolean whiteturn = true;// true is white and false is black
+        public const Byte white = 0;
+        public const Byte black = 1;
+        public Byte color_turn = white;// true is white and false is black
+        public bool white_turn = true;
         public Movegenerator generator;
         public PositionEval Position_evaluatior;
 
@@ -127,13 +131,27 @@ namespace chess
                 this.white_parts[i] = new List<Peace>();
                 this.black_parts[i] = new List<Peace>();
             }
+
             // in a chess game every side can only have 1 king
-            this.white_parts[5].Capacity = 1;
-            this.black_parts[5].Capacity = 1;
+            this.white_parts[Peace.King].Capacity = 1;
+            this.black_parts[Peace.King].Capacity = 1;
 
             // in a chess game every side can only have 8 pawns
-            this.white_parts[0].Capacity = 8;
-            this.black_parts[0].Capacity = 8;
+            this.white_parts[Peace.Pawn].Capacity = 8;
+            this.black_parts[Peace.Pawn].Capacity = 8;
+
+            // some general assumptions
+            this.white_parts[Peace.Bishop].Capacity = 4;
+            this.black_parts[Peace.Bishop].Capacity = 4;
+            this.white_parts[Peace.Knight].Capacity = 4;
+            this.black_parts[Peace.Knight].Capacity = 4;
+            this.white_parts[Peace.Rook].Capacity = 4;
+            this.black_parts[Peace.Rook].Capacity = 4;
+            this.white_parts[Peace.Queen].Capacity = 3;
+            this.black_parts[Peace.Queen].Capacity = 3;
+
+            //this variable responsible for accesing all of the peaces
+            this.peaces = new List<Peace>[][] { white_parts, black_parts };
 
             //create the position evaluator
             this.Position_evaluatior = new PositionEval(this);
@@ -152,26 +170,26 @@ namespace chess
             //create all of the pawns
             for (int j = 0; j < 8; j++) 
             {
-                addpeacetoboardandlist(new Pawn(false, j + 8));
-                addpeacetoboardandlist(new Pawn(true, j + 48));
+                addpeacetoboardandlist(new Pawn(black, j + 8));
+                addpeacetoboardandlist(new Pawn(white, j + 48));
             }
             //create all of the knights
-            addpeacetoboardandlist(new Knight(false, 1)); addpeacetoboardandlist(new Knight(false, 6));
-            addpeacetoboardandlist(new Knight(true, 57)); addpeacetoboardandlist(new Knight(true, 62));
+            addpeacetoboardandlist(new Knight(black, 1)); addpeacetoboardandlist(new Knight(black, 6));
+            addpeacetoboardandlist(new Knight(white, 57)); addpeacetoboardandlist(new Knight(white, 62));
 
             //create all of the bishops
-            addpeacetoboardandlist(new Bishop(false, 2)); addpeacetoboardandlist(new Bishop(false, 5));
-            addpeacetoboardandlist(new Bishop(true, 58)); addpeacetoboardandlist(new Bishop(true, 61));
+            addpeacetoboardandlist(new Bishop(black, 2)); addpeacetoboardandlist(new Bishop(black, 5));
+            addpeacetoboardandlist(new Bishop(white, 58)); addpeacetoboardandlist(new Bishop(white, 61));
 
             //create all of the rooks
-            addpeacetoboardandlist(new Rook(false, 0)); addpeacetoboardandlist(new Rook(false, 7));
-            addpeacetoboardandlist(new Rook(true, 56)); addpeacetoboardandlist(new Rook(true, 63));
+            addpeacetoboardandlist(new Rook(black, 0)); addpeacetoboardandlist(new Rook(black, 7));
+            addpeacetoboardandlist(new Rook(white, 56)); addpeacetoboardandlist(new Rook(white, 63));
 
             //create all of the queens
-            addpeacetoboardandlist(new Queen(false, 3)); addpeacetoboardandlist(new Queen(true, 59));
+            addpeacetoboardandlist(new Queen(black, 3)); addpeacetoboardandlist(new Queen(white, 59));
 
             //create all of the kings
-            addpeacetoboardandlist(new King(false, 4)); addpeacetoboardandlist(new King(true, 60));
+            addpeacetoboardandlist(new King(black, 4)); addpeacetoboardandlist(new King(white, 60));
             
         }
 
@@ -211,9 +229,9 @@ namespace chess
                         default:
                             int peacetype = dic[Char.ToLower(character)];
                             if (Char.IsUpper(character))//if white peace
-                                addpeacetoboardandlist(new Peace(true,i*8+j , peacetype));
+                                addpeacetoboardandlist(new Peace(white, i*8+j , peacetype));
                             else
-                                addpeacetoboardandlist(new Peace(false, i * 8 + j, peacetype));
+                                addpeacetoboardandlist(new Peace(black, i * 8 + j, peacetype));
                             j++;
                             break;
                     }
@@ -223,9 +241,9 @@ namespace chess
             
             LoopEnd:
             if (Char.ToLower(FEN_notation[counter++]) == 'w')
-                this.whiteturn = true;
+                this.color_turn = white;
             else
-                this.whiteturn = false;
+                this.color_turn = black;
             counter = counter + 1;
             this.can_castle[1] = false;
             this.can_castle[2] = false;
@@ -282,7 +300,7 @@ namespace chess
                     fen += "/";
                 counter = 0;
             }
-            if(this.whiteturn)
+            if(is_white_turn())
                 fen += " w ";
             else
                 fen += " b ";
@@ -311,27 +329,11 @@ namespace chess
         }
         private void removepeacefromlist(Peace peace)
         {
-            if (peace.iswhite)
-            {
-                this.white_parts[peace.type].Remove(peace);
-                return;
-            }
-            this.black_parts[peace.type].Remove(peace);
+            this.peaces[peace.color][peace.type].Remove(peace);
         }
         private void addpeacetolist(Peace peace)
         {
-            if (peace.iswhite)
-            {
-                this.white_parts[peace.type].Add(peace);
-                return;
-            }
-            this.black_parts[peace.type].Add(peace);
-        }
-        private List<Peace>[] get_current_player_list()
-        {
-            if (this.whiteturn)
-                return this.white_parts;
-            return this.black_parts;
+            this.peaces[peace.color][peace.type].Add(peace);
         }
         
         public void manualy_makemove(Move move) //make sure if its last move of the pawn that it is correct
@@ -339,6 +341,7 @@ namespace chess
             manualy_makemove_without_switching_turns(move);
             switchplayerturn();
         }
+        internal static readonly int[] get_king_row_at_castling = { 7, 0 };
         //take a move - not matter if the move eats a peace of the same color of the eater
         //takes a move - no matter whose turn to play it is!!!!
         //no matter if there is a peace from the same color in it!!!!
@@ -359,18 +362,10 @@ namespace chess
 
                 if (move.capturedpeace.type == Peace.Rook)
                 {// what happen if rook gets eaten - you have to change the castling rights
-                    int offset = getoffset(move.capturedpeace.iswhite);
+                    int offset = getoffset(move.capturedpeace.color);
                     if (this.can_castle[offset])//if king hasnt moved
                     {
-                        int row;
-                        if (move.capturedpeace.iswhite)
-                        {
-                            row = 7;
-                        }
-                        else
-                        {
-                            row = 0;
-                        }
+                        int row = get_king_row_at_castling[move.capturedpeace.color];
                         if (iendpo == row)//if the eaten rook is the one that can castle
                         {
                             //debug issue in fen :r3k2r/Pppp1ppp/1b3nbN/nPP5/BB2P3/q4N2/P2P2PP/r2Q1RK1 w kq - 0 1
@@ -397,9 +392,7 @@ namespace chess
             }
             else if (move.edgecase == Move.castle) // if a castle movement
             { //the king moves more than one square in one move
-                int row = 0;
-                if (this.board[istartpo, jstartpo].Peace.iswhite)
-                    row = 7;
+                int row = get_king_row_at_castling[this.board[istartpo, jstartpo].Peace.color];
                 if(move.endsquare == move.startsquare +2)//right castle
                 {//changing the position of the right rook
                     if (this.board[row, 7].Peace == null)
@@ -426,7 +419,7 @@ namespace chess
             this.board[iendpo, jendpo].Peace.position = move.endsquare;//change the position of the mover in the list
             this.board[istartpo, jstartpo].Peace = null;//the current squer isnt ocupied
             
-            change_castling_rights(this.board[iendpo, jendpo].Peace.iswhite,move.edgecase, jstartpo);
+            change_castling_rights(this.board[iendpo, jendpo].Peace.color,move.edgecase, jstartpo);
             
             //if a pawn does promotion
             if (move.edgecase > 0 && move.edgecase <= 4)
@@ -441,7 +434,7 @@ namespace chess
         //changing the castling rights according to the peace than moved and its position and if you make move or unmaking it
         //start position refers to the place the peace was before you make the move!!!
         //return edgecase number for a move
-        public void change_castling_rights(bool iswhite, int edgecase, int jstartpo)
+        public void change_castling_rights(Byte iswhite, int edgecase, int jstartpo)
         {
             if (kingdidntmoved(iswhite) && edgecase !=0)
             {
@@ -464,7 +457,7 @@ namespace chess
             }// white all, white left , white right, black all , black left , black right
         }
         
-        public void unmake_castling_rights(int edgecase, Boolean iswhite, int jstartpo)
+        public void unmake_castling_rights(int edgecase, Byte iswhite, int jstartpo)
         {
             if (edgecase != 0)
             {
@@ -508,7 +501,7 @@ namespace chess
             if (peace_got_captured && move.capturedpeace.position <0)//rook got eaten and could castle before that
             {// if rook got eaten - you have to change the castling rights
                 move.capturedpeace.position += 64;
-                int offset = getoffset(move.capturedpeace.iswhite);
+                int offset = getoffset(move.capturedpeace.color);
                 if (jendpo == 0)//eating the left rook
                 {
                     this.can_castle[offset + 1] = true; 
@@ -520,7 +513,7 @@ namespace chess
                 
             }
             //
-            unmake_castling_rights(move.edgecase, this.board[iendpo, jendpo].Peace.iswhite, jstartpo);
+            unmake_castling_rights(move.edgecase, this.board[iendpo, jendpo].Peace.color, jstartpo);
             //move the peace position value back
             this.board[iendpo, jendpo].Peace.position = move.startsquare;
             //move the peace position back in the board
@@ -544,19 +537,14 @@ namespace chess
                     this.board[iendpo, jendpo].Peace = null;//the end squer isnt ocupied anymore
 
                 //add the captured peace in the list
-                if (move.capturedpeace.iswhite)
-                    this.white_parts[move.capturedpeace.type].Add(move.capturedpeace);
-                else
-                    this.black_parts[move.capturedpeace.type].Add(move.capturedpeace);
+                this.peaces[move.capturedpeace.color][move.capturedpeace.type].Add(move.capturedpeace);
             }
             else
             {
                 this.board[iendpo, jendpo].Peace = null;//the end squer isnt ocupied
                 if (move.edgecase == Move.castle) // if a castle movement
                 { //the king moves more than one square in one move
-                    int row = 0;
-                    if (this.board[istartpo, jstartpo].Peace.iswhite)
-                        row = 7;
+                    int row = get_king_row_at_castling[this.board[istartpo, jstartpo].Peace.color];
                     if (move.endsquare == move.startsquare +2)//right castle
                     {//changing the position of the right rook
                         this.board[row, 7].Peace = this.board[row, 5].Peace;
@@ -613,13 +601,7 @@ namespace chess
             }
             Console.WriteLine("move is ilegal...");
         }
-
-        //switch the boolean value indicates which player turn it is to play
-        public void switchplayerturn()
-        {
-            this.whiteturn = !this.whiteturn;
-        }
-
+        
         //return a string representation of the board
         override public string ToString()
         {
@@ -745,7 +727,7 @@ namespace chess
         //this fun check if the king is in check from the king's eye sight
         public Boolean current_player_king_in_check()
         {
-            int k_pos = get_king_pos(whiteturn);
+            int k_pos = get_king_pos(color_turn);
             return pos_in_check(get_i_pos(k_pos), get_j_pos(k_pos));
         }
         public Boolean pos_in_check(int pos)
@@ -755,26 +737,13 @@ namespace chess
         public Boolean pos_in_check(int i, int j)
         {
             int pc_type,t;
-            int[] op_knight_positions;
-            if (whiteturn)//white turn
-            {
-                op_knight_positions = new int[this.black_parts[Peace.Knight].Count];
-                for (t = 0; t < op_knight_positions.Length; t++)
-                    op_knight_positions[t] = this.black_parts[Peace.Knight][t].position;
-            }
-            else //black turn
-            {
-                op_knight_positions = new int[this.white_parts[Peace.Knight].Count];
-                for (t = 0; t < op_knight_positions.Length; t++)
-                    op_knight_positions[t] = this.white_parts[Peace.Knight][t].position;
-            }
 
             //generate all the moves right_up to the peace
             for (t = 1; t + j < chessboard.board_size && i - t >= 0; t++)
             {
                 if (board[i - t, t + j].isocupied())
                 {
-                    if (board[i - t, t + j].Peace.iswhite != whiteturn)
+                    if (board[i - t, t + j].Peace.color != color_turn)
                     {
                         pc_type = board[i - t, t + j].Peace.type;
                         if (pc_type == Peace.Bishop || pc_type == Peace.Queen)
@@ -783,7 +752,7 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return true;
-                            if (whiteturn && pc_type == Peace.Pawn)
+                            if (is_white_turn() && pc_type == Peace.Pawn)
                                 return true;
                         }
                     }
@@ -796,7 +765,7 @@ namespace chess
             {
                 if (board[t + i, j - t].isocupied())
                 {
-                    if (board[t + i, j - t].Peace.iswhite != whiteturn)
+                    if (board[t + i, j - t].Peace.color != color_turn)
                     {
                         pc_type = board[t + i, j - t].Peace.type;
                         if (pc_type == Peace.Bishop || pc_type == Peace.Queen)
@@ -805,7 +774,7 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return true;
-                            if (whiteturn == false && pc_type == Peace.Pawn)
+                            if (is_black_turn() && pc_type == Peace.Pawn)
                                 return true;
                         }
                     }
@@ -818,7 +787,7 @@ namespace chess
             {
                 if (board[i - t, j - t].isocupied())
                 {
-                    if (board[i - t, j - t].Peace.iswhite != whiteturn)
+                    if (board[i - t, j - t].Peace.color != color_turn)
                     {
                         pc_type = board[i - t, j - t].Peace.type;
                         if (pc_type == Peace.Bishop || pc_type == Peace.Queen)
@@ -827,7 +796,7 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return true;
-                            if (whiteturn && pc_type == Peace.Pawn)
+                            if (is_white_turn() && pc_type == Peace.Pawn)
                                 return true;
                         }
                     }
@@ -840,7 +809,7 @@ namespace chess
             {
                 if (board[i + t, j + t].isocupied())
                 {
-                    if (board[i + t, j + t].Peace.iswhite != whiteturn)
+                    if (board[i + t, j + t].Peace.color != color_turn)
                     {
                         pc_type = board[i + t, j + t].Peace.type;
                         if (pc_type == Peace.Bishop || pc_type == Peace.Queen)
@@ -849,7 +818,7 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return true;
-                            if (whiteturn == false && pc_type == Peace.Pawn)
+                            if (is_black_turn() && pc_type == Peace.Pawn)
                                 return true;
                         }
                     }
@@ -863,7 +832,7 @@ namespace chess
             {
                 if (board[i, t].isocupied())
                 {
-                    if (board[i, t].Peace.iswhite != whiteturn)
+                    if (board[i, t].Peace.color != color_turn)
                     {
                         pc_type = board[i, t].Peace.type;
                         if (pc_type == Peace.Rook || pc_type == Peace.Queen)
@@ -881,7 +850,7 @@ namespace chess
             {
                 if (board[i, t].isocupied())
                 {
-                    if (board[i, t].Peace.iswhite != whiteturn)
+                    if (board[i, t].Peace.color != color_turn)
                     {
                         pc_type = board[i, t].Peace.type;
                         if (pc_type == Peace.Rook || pc_type == Peace.Queen)
@@ -898,7 +867,7 @@ namespace chess
             {
                 if (board[t, j].isocupied())
                 {
-                    if (board[t, j].Peace.iswhite != whiteturn)
+                    if (board[t, j].Peace.color != color_turn)
                     {
                         pc_type = board[t, j].Peace.type;
                         if (pc_type == Peace.Rook || pc_type == Peace.Queen)
@@ -915,7 +884,7 @@ namespace chess
             {
                 if (board[t, j].isocupied())
                 {
-                    if (board[t, j].Peace.iswhite != whiteturn)
+                    if (board[t, j].Peace.color != color_turn)
                     {
                         pc_type = board[t, j].Peace.type;
                         if (pc_type == Peace.Rook || pc_type == Peace.Queen)
@@ -926,6 +895,11 @@ namespace chess
                     break;
                 }
             }
+            
+            int[] op_knight_positions = new int[this.peaces[opponent_color()][Peace.Knight].Count];
+            for (t = 0; t < op_knight_positions.Length; t++)
+                op_knight_positions[t] = this.peaces[opponent_color()][Peace.Knight][t].position;
+            
             for (t = 0; t < op_knight_positions.Length; t++)
             {
                 if (i != get_i_pos(op_knight_positions[t]) && j != get_j_pos(op_knight_positions[t]) && (Math.Abs(i - get_i_pos(op_knight_positions[t])) + Math.Abs(j - get_j_pos(op_knight_positions[t])) == 3))
@@ -946,7 +920,7 @@ namespace chess
             {
                 if (board[i_king_pos - t, t + j_king_pos].isocupied())
                 {
-                    if (board[i_king_pos - t, t + j_king_pos].Peace.iswhite != whiteturn) //oponent peace
+                    if (board[i_king_pos - t, t + j_king_pos].Peace.color != color_turn) //oponent peace
                     {
                         pc_type = board[i_king_pos - t, t + j_king_pos].Peace.type;
                         if ((pc_type == Peace.Bishop || pc_type == Peace.Queen)&& defenders <= 1)
@@ -955,7 +929,7 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return false;
-                            if (whiteturn && pc_type == Peace.Pawn)
+                            if (is_white_turn() && pc_type == Peace.Pawn)
                                 return false;
                         }
                     }
@@ -971,7 +945,7 @@ namespace chess
             {
                 if (board[t + i_king_pos, j_king_pos - t].isocupied())
                 {
-                    if (board[t + i_king_pos, j_king_pos - t].Peace.iswhite != whiteturn)
+                    if (board[t + i_king_pos, j_king_pos - t].Peace.color != color_turn)
                     {
                         pc_type = board[t + i_king_pos, j_king_pos - t].Peace.type;
                         if ((pc_type == Peace.Bishop || pc_type == Peace.Queen)&& defenders <= 1)
@@ -980,7 +954,7 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return false;
-                            if (whiteturn == false && pc_type == Peace.Pawn)
+                            if (is_black_turn() && pc_type == Peace.Pawn)
                                 return false;
                         }
                     }
@@ -996,7 +970,7 @@ namespace chess
             {
                 if (board[i_king_pos - t, j_king_pos - t].isocupied())
                 {
-                    if (board[i_king_pos - t, j_king_pos - t].Peace.iswhite != whiteturn)
+                    if (board[i_king_pos - t, j_king_pos - t].Peace.color != color_turn)
                     {
                         pc_type = board[i_king_pos - t, j_king_pos - t].Peace.type;
                         if ((pc_type == Peace.Bishop || pc_type == Peace.Queen)&& defenders <= 1)
@@ -1005,7 +979,7 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return false;
-                            if (whiteturn && pc_type == Peace.Pawn)
+                            if (is_white_turn() && pc_type == Peace.Pawn)
                                 return false;
                         }
                     }
@@ -1021,7 +995,7 @@ namespace chess
             {
                 if (board[i_king_pos + t, j_king_pos + t].isocupied())
                 {
-                    if (board[i_king_pos + t, j_king_pos + t].Peace.iswhite != whiteturn)
+                    if (board[i_king_pos + t, j_king_pos + t].Peace.color != color_turn)
                     {
                         pc_type = board[i_king_pos + t, j_king_pos + t].Peace.type;
                         if ((pc_type == Peace.Bishop || pc_type == Peace.Queen)&& defenders <= 1)
@@ -1030,7 +1004,7 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return false;
-                            if (whiteturn == false && pc_type == Peace.Pawn)
+                            if (is_black_turn() && pc_type == Peace.Pawn)
                                 return false;
                         }
                     }
@@ -1047,7 +1021,7 @@ namespace chess
             {
                 if (board[i_king_pos, t].isocupied())
                 {
-                    if (board[i_king_pos, t].Peace.iswhite != whiteturn)
+                    if (board[i_king_pos, t].Peace.color != color_turn)
                     {
                         pc_type = board[i_king_pos, t].Peace.type;
                         if ((pc_type == Peace.Rook || pc_type == Peace.Queen)&& defenders <= 1)
@@ -1068,7 +1042,7 @@ namespace chess
             {
                 if (board[i_king_pos, t].isocupied())
                 {
-                    if (board[i_king_pos, t].Peace.iswhite != whiteturn)
+                    if (board[i_king_pos, t].Peace.color != color_turn)
                     {
                         pc_type = board[i_king_pos, t].Peace.type;
                         if ((pc_type == Peace.Rook || pc_type == Peace.Queen)&& defenders <= 1)
@@ -1088,7 +1062,7 @@ namespace chess
             {
                 if (board[t, j_king_pos].isocupied())
                 {
-                    if (board[t, j_king_pos].Peace.iswhite != whiteturn)
+                    if (board[t, j_king_pos].Peace.color != color_turn)
                     {
                         pc_type = board[t, j_king_pos].Peace.type;
                         if ((pc_type == Peace.Rook || pc_type == Peace.Queen)&& defenders <= 1)
@@ -1108,7 +1082,7 @@ namespace chess
             {
                 if (board[t, j_king_pos].isocupied())
                 {
-                    if (board[t, j_king_pos].Peace.iswhite != whiteturn)
+                    if (board[t, j_king_pos].Peace.color != color_turn)
                     {
                         pc_type = board[t, j_king_pos].Peace.type;
                         if ((pc_type == Peace.Rook || pc_type == Peace.Queen)&& defenders <= 1)
@@ -1122,18 +1096,10 @@ namespace chess
                         defenders++;
                 }
             }
-            if (whiteturn)//white turn
-            {
-                op_knight_positions = new int[this.black_parts[Peace.Knight].Count];
-                for (t = 0; t < op_knight_positions.Length; t++)
-                    op_knight_positions[t] = this.black_parts[Peace.Knight][t].position;
-            }
-            else //black turn
-            {
-                op_knight_positions = new int[this.white_parts[Peace.Knight].Count];
-                for (t = 0; t < op_knight_positions.Length; t++)
-                    op_knight_positions[t] = this.white_parts[Peace.Knight][t].position;
-            }
+            op_knight_positions = new int[this.peaces[opponent_color()][Peace.Knight].Count];
+            for (t = 0; t < op_knight_positions.Length; t++)
+                op_knight_positions[t] = this.peaces[opponent_color()][Peace.Knight][t].position;
+
             for (t = 0; t < op_knight_positions.Length; t++)
             {
                 if (i_king_pos != get_i_pos(op_knight_positions[t]) && j_king_pos != get_j_pos(op_knight_positions[t]) && (Math.Abs(i_king_pos - get_i_pos(op_knight_positions[t])) + Math.Abs(j_king_pos - get_j_pos(op_knight_positions[t])) == 3))
@@ -1143,30 +1109,20 @@ namespace chess
         }
 
         //return if the king moved at least once sience the beggining of the game.
-        public bool kingdidntmoved(bool iswhite)
+        public bool kingdidntmoved(Byte color)
         {// check if the king of that peace didnt move from there position once.
-            if (iswhite)
+            if (is_white_turn())
                 return this.can_castle[0];
             return this.can_castle[3];
         }
-        public int get_king_pos(bool iswhite)
+        public int get_king_pos(Byte color)
         {// get the position of the king with the input color
-            if (whiteturn)
-            {
-                return this.white_parts[Peace.King][0].position;
-            }
-            else
-            {
-                //printstatics();
-                return this.black_parts[Peace.King][0].position;
-            }
+            return peaces[color][Peace.King][0].position;
         }
-
-        public int getoffset(bool iswhite)
+        private static readonly int[] offset = { 0, 3 };
+        public static int getoffset(Byte color)
         {
-            if (iswhite)
-                return 0;
-            return 3;
+            return offset[color];
         }
         //gets i/j index for the board matrix representation from a one number position 
         public static int get_i_pos(int position)
@@ -1181,6 +1137,26 @@ namespace chess
         {
             const string letters = "ABCDEFGH";
             return letters[get_j_pos(position)];
+        }
+        
+        //switch the boolean value indicates which player turn it is to play
+        public void switchplayerturn()
+        {
+            color_turn ^= black; //XOR's the first bit with 1, which toggles it.
+            white_turn = !white_turn;
+        }
+        
+        public Boolean is_white_turn()
+        {
+            return white_turn;
+        }
+        public Boolean is_black_turn()
+        {
+            return !is_white_turn();
+        }
+        public Byte opponent_color()
+        {
+            return (Byte)(color_turn ^ 1);//XOR's the first bit with 1, which toggles it.
         }
 
         public int Evaluate()

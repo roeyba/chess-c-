@@ -390,22 +390,14 @@ namespace chess
                 int row = get_king_row_at_castling[this.board[move.startsquare].Peace.color] * board_size;
                 if(move.endsquare == move.startsquare +2)//right castle
                 {//changing the position of the right rook
-                    if (this.board[row + 7].Peace == null)
-                    {
-                        this.printstatics();
-                    }
                     this.board[row + 5].Peace = this.board[row + 7].Peace;
-                    this.board[row + 5].Peace.position = row * chessboard.board_size+5;
+                    this.board[row + 5].Peace.position = row +5;
                     this.board[row + 7].Peace = null;
                 }
                 else if(move.endsquare == move.startsquare - 2)//left castle
                 {//changing the position of the left rook
-                    if (this.board[row + 0].Peace == null)
-                    {
-                        this.printstatics();
-                    }
                     this.board[row + 3].Peace = this.board[row + 0].Peace;
-                    this.board[row + 3].Peace.position = row * chessboard.board_size+3;
+                    this.board[row + 3].Peace.position = row +3;
                     this.board[row + 0].Peace = null;
                 }
             }
@@ -538,13 +530,13 @@ namespace chess
                     if (move.endsquare == move.startsquare +2)//right castle
                     {//changing the position of the right rook
                         this.board[row + 7].Peace = this.board[row + 5].Peace;
-                        this.board[row + 7].Peace.position = row * chessboard.board_size+7;
+                        this.board[row + 7].Peace.position = row +7;
                         this.board[row + 5].Peace = null;
                     }
                     if (move.endsquare == move.startsquare - 2)//left castle
                     {//changing the position of the left rook
                         this.board[row + 0].Peace = this.board[row + 3].Peace;
-                        this.board[row + 0].Peace.position = row * chessboard.board_size;
+                        this.board[row + 0].Peace.position = row;
                         this.board[row + 3].Peace = null;
                     }
                 }
@@ -719,7 +711,7 @@ namespace chess
         {
             return pos_in_check(get_king_pos(color_turn));
         }
-        private Boolean pos_in_check_at_diagonal(int position, int direction)
+        private Boolean pos_in_check_at_diagonal(int position, int direction, Boolean pawn_attack_color)
         {
             int pos = position;
             for (int i = 0; i < Movegenerator.squers_to_edge[direction][position]; i++)
@@ -736,7 +728,7 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return true;
-                            if (is_white_turn() && pc_type == Peace.Pawn)
+                            if (pawn_attack_color && pc_type == Peace.Pawn)
                                 return true;
                         }
                     }
@@ -769,10 +761,10 @@ namespace chess
         public Boolean pos_in_check(int position)
         {
             if (
-                pos_in_check_at_diagonal(position, Movegenerator.right_up) ||
-                pos_in_check_at_diagonal(position, Movegenerator.left_down) ||
-                pos_in_check_at_diagonal(position, Movegenerator.left_up) ||
-                pos_in_check_at_diagonal(position, Movegenerator.right_down) ||
+                pos_in_check_at_diagonal(position, Movegenerator.right_up,is_white_turn()) ||
+                pos_in_check_at_diagonal(position, Movegenerator.left_down, is_black_turn()) ||
+                pos_in_check_at_diagonal(position, Movegenerator.left_up, is_white_turn()) ||
+                pos_in_check_at_diagonal(position, Movegenerator.right_down, is_black_turn()) ||
                 pos_in_check_at_verticle(position, Movegenerator.right) ||
                 pos_in_check_at_verticle(position, Movegenerator.left) ||
                 pos_in_check_at_verticle(position, Movegenerator.down) ||
@@ -802,7 +794,7 @@ namespace chess
             return false;
         }
 
-        private Boolean there_are_attacks_or_pins_at_diagonal(int position, int direction)
+        private Boolean there_are_attacks_or_pins_at_diagonal(int position, int direction, Boolean pawn_attack_color)
         {
             int defenders = 0;
             int pos = position;
@@ -861,10 +853,10 @@ namespace chess
         public bool there_arent_attacks_or_pins(int king_pos)
         {
             if (
-                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.right_up) ||
-                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.left_down) ||
-                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.left_up) ||
-                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.right_down) ||
+                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.right_up, is_white_turn()) ||
+                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.left_down, is_black_turn()) ||
+                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.left_up, is_white_turn()) ||
+                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.right_down, is_black_turn()) ||
                 there_are_attacks_or_pins_at_verticle(king_pos, Movegenerator.right) ||
                 there_are_attacks_or_pins_at_verticle(king_pos, Movegenerator.left) ||
                 there_are_attacks_or_pins_at_verticle(king_pos, Movegenerator.down) ||
@@ -903,6 +895,8 @@ namespace chess
         }
         public int get_king_pos(Byte color)
         {// get the position of the king with the input color
+            if(peaces[color][Peace.King].Count ==0)
+                printstatics();
             return peaces[color][Peace.King][0].position;
         }
         private static readonly int[] offset = { 0, 3 };

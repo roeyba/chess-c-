@@ -27,10 +27,10 @@ namespace chess.types_of_peaces
             Init_tables();
         }
 
-        private const int white = 0;
-        private const int black = 1;
+        private const Byte white = 0;
+        private const Byte black = 1;
 
-        private static readonly int[] mg_pawn_table = {
+        private static readonly short[] mg_pawn_table = {
               0,   0,   0,   0,   0,   0,  0,   0,
              98, 134,  61,  95,  68, 126, 34, -11,
              -6,   7,  26,  31,  65,  56, 25, -20,
@@ -41,7 +41,7 @@ namespace chess.types_of_peaces
               0,   0,   0,   0,   0,   0,  0,   0,
         };
 
-        private static readonly int[] eg_pawn_table = {
+        private static readonly short[] eg_pawn_table = {
               0,   0,   0,   0,   0,   0,   0,   0,
             178, 173, 158, 134, 147, 132, 165, 187,
              94, 100,  85,  67,  56,  53,  82,  84,
@@ -52,7 +52,7 @@ namespace chess.types_of_peaces
               0,   0,   0,   0,   0,   0,   0,   0,
         };
 
-        private static readonly int[] mg_knight_table = {
+        private static readonly short[] mg_knight_table = {
             -167, -89, -34, -49,  61, -97, -15, -107,
              -73, -41,  72,  36,  23,  62,   7,  -17,
              -47,  60,  37,  65,  84, 129,  73,   44,
@@ -63,7 +63,7 @@ namespace chess.types_of_peaces
             -105, -21, -58, -33, -17, -28, -19,  -23,
         };
 
-        private static readonly int[] eg_knight_table = {
+        private static readonly short[] eg_knight_table = {
             -58, -38, -13, -28, -31, -27, -63, -99,
             -25,  -8, -25,  -2,  -9, -25, -24, -52,
             -24, -20,  10,   9,  -1,  -9, -19, -41,
@@ -74,7 +74,7 @@ namespace chess.types_of_peaces
             -29, -51, -23, -15, -22, -18, -50, -64,
         };
 
-        private static readonly int[] mg_bishop_table = {
+        private static readonly short[] mg_bishop_table = {
             -29,   4, -82, -37, -25, -42,   7,  -8,
             -26,  16, -18, -13,  30,  59,  18, -47,
             -16,  37,  43,  40,  35,  50,  37,  -2,
@@ -85,7 +85,7 @@ namespace chess.types_of_peaces
             -33,  -3, -14, -21, -13, -12, -39, -21,
         };
 
-        private static readonly int[] eg_bishop_table = {
+        private static readonly short[] eg_bishop_table = {
             -14, -21, -11,  -8, -7,  -9, -17, -24,
              -8,  -4,   7, -12, -3, -13,  -4, -14,
               2,  -8,   0,  -1, -2,   6,   0,   4,
@@ -96,7 +96,7 @@ namespace chess.types_of_peaces
             -23,  -9, -23,  -5, -9, -16,  -5, -17,
         };
 
-        private static readonly int[] mg_rook_table = {
+        private static readonly short[] mg_rook_table = {
              32,  42,  32,  51, 63,  9,  31,  43,
              27,  32,  58,  62, 80, 67,  26,  44,
              -5,  19,  26,  36, 17, 45,  61,  16,
@@ -107,7 +107,7 @@ namespace chess.types_of_peaces
             -19, -13,   1,  17, 16,  7, -37, -26,
         };
 
-        private static readonly int[] eg_rook_table = {
+        private static readonly short[] eg_rook_table = {
             13, 10, 18, 15, 12,  12,   8,   5,
             11, 13, 13, 11, -3,   3,   8,   3,
              7,  7,  7,  5,  4,  -3,  -5,  -3,
@@ -118,7 +118,7 @@ namespace chess.types_of_peaces
             -9,  2,  3, -1, -5, -13,   4, -20,
         };
 
-        private static readonly int[] mg_queen_table = {
+        private static readonly short[] mg_queen_table = {
             -28,   0,  29,  12,  59,  44,  43,  45,
             -24, -39,  -5,   1, -16,  57,  28,  54,
             -13, -17,   7,   8,  29,  56,  47,  57,
@@ -129,7 +129,7 @@ namespace chess.types_of_peaces
              -1, -18,  -9,  10, -15, -25, -31, -50,
         };
 
-        private static readonly int[] eg_queen_table = {
+        private static readonly short[] eg_queen_table = {
              -9,  22,  22,  27,  27,  19,  10,  20,
             -17,  20,  32,  41,  58,  25,  30,   0,
             -20,   6,   9,  49,  47,  35,  19,   9,
@@ -140,7 +140,7 @@ namespace chess.types_of_peaces
             -33, -28, -22, -43,  -5, -32, -20, -41,
         };
 
-        private static readonly int[] mg_king_table = {
+        private static readonly short[] mg_king_table = {
             -65,  23,  16, -15, -56, -34,   2,  13,
              29,  -1, -20,  -7,  -8,  -4, -38, -29,
              -9,  24,   2, -16, -20,   6,  22, -22,
@@ -151,7 +151,7 @@ namespace chess.types_of_peaces
             -15,  36,  12, -54,   8, -28,  24,  14,
         };
 
-        private static readonly int[] eg_king_table = {
+        private static readonly short[] eg_king_table = {
             -74, -35, -18, -18, -11,  15,   4, -17,
             -12,  17,  14,  17,  17,  38,  23,  11,
              10,  17,  23,  15,  20,  45,  44,  13,
@@ -162,7 +162,7 @@ namespace chess.types_of_peaces
             -53, -34, -21, -11, -28, -14, -24, -43
         };
         //
-        private static readonly int[][] mg_pesto_table =
+        private static readonly short[][] mg_pesto_table =
         {
             mg_pawn_table,
             mg_knight_table,
@@ -172,7 +172,7 @@ namespace chess.types_of_peaces
             mg_king_table
         };
 
-        private static readonly int[][] eg_pesto_table =
+        private static readonly short[][] eg_pesto_table =
         {
             eg_pawn_table,
             eg_knight_table,
@@ -182,12 +182,12 @@ namespace chess.types_of_peaces
             eg_king_table
         };
 
-        private static readonly int[] gamephaseInc = { 0, 1, 1, 2, 4, 0 }; //the importence of the peace in a chess game
-        private static readonly int[] mg_value = { 82, 337, 365, 477, 1025, 0 };//the value of eace peace in the middle game
-        private static readonly int[] eg_value = { 94, 281, 297, 512,  936, 0 };//the value of eace peace in the middle endgame
+        private static readonly int[] gamephaseInc = { 0, 1, 1, 2, 4, 0 }; //the importence of the peace in a chess game, for calculating the game phase
+        private static readonly short[] mg_value = { 82, 337, 365, 477, 1025, 0 };//the value of eace peace in the middle game
+        private static readonly short[] eg_value = { 94, 281, 297, 512,  936, 0 };//the value of eace peace in the middle endgame
 
-        private int[][,] mg_table;
-        private int[][,] eg_table;
+        private short[][,] mg_table;
+        private short[][,] eg_table;
 
         private int[] mg;//holds the score in the middle game faze
         private int[] eg;//holds the score in the end game faze
@@ -197,18 +197,18 @@ namespace chess.types_of_peaces
         void Init_tables()
         {
             //types of peaces *2 , squere location on the board
-            this.mg_table = new int[2][,]; this.mg_table[white] = new int[6, 64]; this.mg_table[black] = new int[6, 64];
-            this.eg_table = new int[2][,]; this.eg_table[white] = new int[6, 64]; this.eg_table[black] = new int[6, 64];
+            this.mg_table = new short[2][,]; this.mg_table[white] = new short[6, 64]; this.mg_table[black] = new short[6, 64];
+            this.eg_table = new short[2][,]; this.eg_table[white] = new short[6, 64]; this.eg_table[black] = new short[6, 64];
             int peace;
             uint sq;
             for (peace = Peace.Pawn; peace <= Peace.King; peace++) {
                 for (sq = 0; sq < 64; sq++) {
-                    mg_table[white][peace,sq] = mg_value[peace] + mg_pesto_table[peace][sq];
-                    eg_table[white][peace, sq] = eg_value[peace] + eg_pesto_table[peace][sq];
+                    mg_table[white][peace,sq] = (short)(mg_value[peace] + mg_pesto_table[peace][sq]);
+                    eg_table[white][peace, sq] = (short)(eg_value[peace] + eg_pesto_table[peace][sq]);
 
                     //create mirrored tables for black
-                    mg_table[black][peace, sq] = mg_value[peace] + mg_pesto_table[peace][sq ^ 56];
-                    eg_table[black][peace, sq] = eg_value[peace] + eg_pesto_table[peace][sq ^ 56];
+                    mg_table[black][peace, sq] = (short)(mg_value[peace] + mg_pesto_table[peace][sq ^ 56]);
+                    eg_table[black][peace, sq] = (short)(eg_value[peace] + eg_pesto_table[peace][sq ^ 56]);
                     // ^ bit opperator
                     //10011
                     //00101

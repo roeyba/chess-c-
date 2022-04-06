@@ -83,11 +83,56 @@ namespace chess
         public const Byte black = 1;
         private chessboard c;
         private Move_list_ordering mo;
+        public static int[][] squers_to_edge;
         //constractor.
         public Movegenerator(chessboard chess)
         {
             this.c = chess;
             this.mo = new Move_list_ordering(chess);
+            //generate the precomputed squers to edge //very not ifficient but it doesnt matter that much because this operation only happens once and because Im lazy
+            squers_to_edge = new int[directions.Length][];
+            for (int i =0; i < directions.Length; i++)
+            {
+                squers_to_edge[i] = new int[chessboard.amount_of_sq];
+                for(int v = 0; v < chessboard.board_size; v++) //{ 1, -1, -8, 8, -7, -9, 9, 7 }
+                {
+                    for (int j = 0; j < chessboard.board_size; j++)
+                    {
+                        if (directions[i] == 9)
+                        {
+                            squers_to_edge[i][v * 8 + j] = Math.Min(7-v, 7-j);
+                        }
+                        else if (directions[i] == -7)
+                        {
+                            squers_to_edge[i][v * 8 + j] = Math.Min(v, 7-j);
+                        }
+                        else if (directions[i] == -9)
+                        {
+                            squers_to_edge[i][v * 8 + j] = Math.Min(v, j);
+                        }
+                        else if (directions[i] == 7)
+                        {
+                            squers_to_edge[i][v * 8 + j] = Math.Min(7-v, j);
+                        }
+                        else if (directions[i] == 8)
+                        {
+                            squers_to_edge[i][v * 8 + j] = 7 - v;
+                        }
+                        else if(directions[i] == -8)
+                        {
+                            squers_to_edge[i][v * 8 + j] = v;
+                        }
+                        else if (directions[i] == 1)
+                        {
+                            squers_to_edge[i][v * 8 + j] = 7 - j;
+                        }
+                        else if (directions[i] == -1)
+                        {
+                            squers_to_edge[i][v * 8 + j] = j;
+                        }
+                    }
+                }
+            }
         }
 
         //generate all of the legal moves for one peace
@@ -95,7 +140,7 @@ namespace chess
         {
             if (peace.type == Peace.Pawn)
             {
-                if (peace.color==white)
+                if (peace.color.Equals(white))
                     return Generatelegalmovesfrompseudolegal(getmoves_w_pawn_pc(peace));
                 return Generatelegalmovesfrompseudolegal(getmoves_b_pawn_pc(peace));
             }
@@ -183,9 +228,39 @@ namespace chess
 
             return moves;
         }
-
+        //general directions (2d directions for 1d array board)
+        public const int right =  0;
+        public const int left  =  1;
+        public const int up    =  2;
+        public const int down  =  3;
+        //
+        public const int right_up   = 4;
+        public const int left_up    = 5;
+        public const int right_down = 6;
+        public const int left_down  = 7;
+        public static readonly int[] directions = { 1, -1, -8, 8, -7, -9, 9, 7 };
+        //
         //these functions return or add to a input list the psudo-legal moves that a peace can do.
         //all of this fucntions are united in "generate_psudo_legal_moves()", in that function all of the posible psudo-legal moves in a board are assembled.
+        private void get_moves_at_direction(Peace peace, int direction, List<Move> moves, int edgecase = Move.None_edgcase)
+        {
+            int pos = peace.position;
+            for (int i = 0; i < squers_to_edge[direction][peace.position]; i++)
+            {
+                pos += directions[direction];
+                if (!this.c.board[pos].isocupied())
+                {
+                    moves.Add(new Move(peace.position, pos, edgecase));
+                }
+                else
+                {
+                    if (!peace.color.Equals(c.board[pos].Peace.color))
+                        moves.Add(new Move(peace.position, pos, edgecase));
+                    break;
+                }
+
+            }
+        }
         private void getmoves_verticle_pc(Peace peace, List<Move> moves)
         {
             int i = peace.get_i_pos();
@@ -202,133 +277,28 @@ namespace chess
                         edgecase = Move.rook_moving;
                 }
             }
-
-            int t; //iterator
+            get_moves_at_direction(peace, right, moves, edgecase);
+            get_moves_at_direction(peace, left , moves, edgecase);
+            get_moves_at_direction(peace, down , moves, edgecase);
+            get_moves_at_direction(peace, up   , moves, edgecase);
             //generate all the moves right to the peace
-            for (t = j + 1; t < chessboard.board_size; t++)
-            {
-                if (!this.c.board[i, t].isocupied())
-                {
-                    moves.Add(new Move(peace.position, i * 8 + t, edgecase));
-                }
-                else
-                {
-                    if (peace.color != c.board[i, t].Peace.color)
-                        moves.Add(new Move(peace.position, i * 8 + t, edgecase));
-                    break;
-                }
-
-            }
-
             //generate all the moves left to the peace
-            for (t = j - 1; t >= 0; t--)
-            {
-                if (!this.c.board[i, t].isocupied())
-                {
-                    moves.Add(new Move(peace.position, i * 8 + t, edgecase));
-                }
-                else
-                {
-                    if (peace.color != c.board[i, t].Peace.color)
-                        moves.Add(new Move(peace.position, i * 8 + t, edgecase));
-                    break;
-                }
-            }
-
             //generate all the moves down the peace
-            for (t = i + 1; t < chessboard.board_size; t++)
-            {
-                if (!this.c.board[t, j].isocupied())
-                {
-                    moves.Add(new Move(peace.position, t * 8 + j, edgecase));
-                }
-                else
-                {
-                    if (peace.color != c.board[t, j].Peace.color)
-                        moves.Add(new Move(peace.position, t * 8 + j, edgecase));
-                    break;
-                }
-            }
-
             //generate all the moves on top of the peace
-            for (t = i - 1; t >= 0; t--)
-            {
-                if (!this.c.board[t, j].isocupied())
-                {
-                    moves.Add(new Move(peace.position, t * 8 + j, edgecase));
-                }
-                else
-                {
-                    if (peace.color != c.board[t, j].Peace.color)
-                        moves.Add(new Move(peace.position, t * 8 + j, edgecase));
-                    break;
-                }
-            }
         }
         private void getmoves_diagonal_pc(Peace peace, List<Move> moves)
         {
             int i = peace.get_i_pos();
             int j = peace.get_j_pos();
             int t;
-            //generate all the moves right_up to the peace
-            for (t = 1; t + j < chessboard.board_size && i - t >= 0; t++)
-            {
-                if (!this.c.board[i - t, t + j].isocupied())
-                {
-                    moves.Add(new Move(peace.position, (i - t) * 8 + t + j));
-                }
-                else
-                {
-                    if (peace.color != c.board[i - t, t + j].Peace.color)
-                        moves.Add(new Move(peace.position, (i - t) * 8 + t + j));
-                    break;
-                }
-            }
-
+            get_moves_at_direction(peace, right_up  , moves);
+            get_moves_at_direction(peace, left_down , moves);
+            get_moves_at_direction(peace, left_up   , moves);
+            get_moves_at_direction(peace, right_down, moves);
+            //generate all the moves right_up  to the peace
             //generate all the moves left_down to the peace
-            for (t = 1; j - t >= 0 && t + i < chessboard.board_size; t++)
-            {
-                if (!this.c.board[t + i, j - t].isocupied())
-                {
-                    moves.Add(new Move(peace.position, (t + i) * 8 + j - t));
-                }
-                else
-                {
-                    if (peace.color != c.board[t + i, j - t].Peace.color)
-                        moves.Add(new Move(peace.position, (t + i) * 8 + j - t));
-                    break;
-                }
-            }
-
-            //generate all the moves left_up to the peace
-            for (t = 1; j - t >= 0 && i - t >= 0; t++)
-            {
-                if (!this.c.board[i - t, j - t].isocupied())
-                {
-                    moves.Add(new Move(peace.position, (i - t) * 8 + j - t));
-                }
-                else
-                {
-                    if (peace.color != c.board[i - t, j - t].Peace.color)
-                        moves.Add(new Move(peace.position, (i - t) * 8 + j - t));
-                    break;
-                }
-            }
-
+            //generate all the moves left_up   to the peace
             //generate all the moves right_down to the peace
-            for (t = 1; t + j < chessboard.board_size && t + i < chessboard.board_size; t++)
-            {
-                if (!this.c.board[i + t, j + t].isocupied())
-                {
-                    moves.Add(new Move(peace.position, (i + t) * 8 + j + t));
-                }
-                else
-                {
-                    if (peace.color != c.board[i + t, j + t].Peace.color)
-                        moves.Add(new Move(peace.position, (i + t) * 8 + j + t));
-                    break;
-                }
-            }
         }
         private List<Move> getmoves_w_pawn_pc(Peace wpawn)
         {
@@ -346,21 +316,21 @@ namespace chess
                 ifinal = chessboard.get_i_pos(lastmove.endsquare);
                 istart = chessboard.get_i_pos(lastmove.startsquare);
             }
-            if (!c.board[i - 1, j].isocupied()) //one step forwords
+            if (!c.board[wpawn.position - 8].isocupied()) //one step forwords
             {
                 moves.Add(new Move(wpawn.position, wpawn.position -8));
-                if (i == 6 && !c.board[i - 2, j].isocupied())         //two steps forwords
+                if (i == 6 && !c.board[wpawn.position - 16].isocupied())         //two steps forwords
                     moves.Add(new Move(wpawn.position, wpawn.position -16));
             }
             if (j != chessboard.board_size - 1)//not at the edge right of the board
             {
-                if (c.board[i - 1, j + 1].isocupied() && c.board[i - 1, j + 1].Peace.is_black())//normal capture right
+                if (c.board[wpawn.position - 7].isocupied() && c.board[wpawn.position - 7].Peace.is_black())//normal capture right
                 {
                     moves.Add(new Move(wpawn.position, wpawn.position -7));
                 }
-                else if (jfinal != 15 && c.board[i, j + 1].isocupied())
+                else if (jfinal != 15 && c.board[wpawn.position + 1].isocupied())
                 {
-                    lastmovepeace = c.board[i, j + 1].Peace;
+                    lastmovepeace = c.board[wpawn.position + 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && lastmovepeace.is_black())// En passant right
                     {
                         if (jfinal == j + 1 && ifinal == i && istart == i - 2)
@@ -370,13 +340,13 @@ namespace chess
             }
             if (j != 0)//not at the edge left of the board
             {
-                if (c.board[i - 1, j - 1].isocupied() && c.board[i - 1, j - 1].Peace.is_black())//normal capture left
+                if (c.board[wpawn.position - 9].isocupied() && c.board[wpawn.position - 9].Peace.is_black())//normal capture left
                 {
                     moves.Add(new Move(wpawn.position, wpawn.position -9));
                 }
-                else if (jfinal != 15 && c.board[i, j - 1].isocupied())
+                else if (jfinal != 15 && c.board[wpawn.position - 1].isocupied())
                 {
-                    lastmovepeace = c.board[i, j - 1].Peace;
+                    lastmovepeace = c.board[wpawn.position - 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && lastmovepeace.is_black())// En passant left
                     {
                         if (jfinal == j - 1 && ifinal == i && istart == i - 2)
@@ -415,21 +385,21 @@ namespace chess
                 ifinal = chessboard.get_i_pos(lastmove.endsquare);
                 istart = chessboard.get_i_pos(lastmove.startsquare);
             }
-            if (!c.board[i + 1, j].isocupied()) //one step forwords
+            if (!c.board[bpawn.position + 8].isocupied()) //one step forwords
             {
                 moves.Add(new Move(bpawn.position, bpawn.position +8));
-                if (i == 1 && !c.board[i + 2, j].isocupied())//two steps forwords
+                if (i == 1 && !c.board[bpawn.position + 16].isocupied())//two steps forwords
                     moves.Add(new Move(bpawn.position, bpawn.position +16));
             }
             if (j != 0)//not at the edge left of the board
             {
-                if (c.board[i + 1, j - 1].isocupied() && c.board[i + 1, j - 1].Peace.is_white())//normal capture left
+                if (c.board[bpawn.position + 7].isocupied() && c.board[bpawn.position + 7].Peace.is_white())//normal capture left
                 {
                     moves.Add(new Move(bpawn.position, bpawn.position +7));
                 }
-                else if (jfinal != 15 && c.board[i, j - 1].isocupied())
+                else if (jfinal != 15 && c.board[bpawn.position - 1].isocupied())
                 {
-                    lastmovepeace = c.board[i, j - 1].Peace;
+                    lastmovepeace = c.board[bpawn.position - 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && lastmovepeace.is_white())// En passant left
                     {
                         if (jfinal == j - 1 && ifinal == i && istart == i + 2)
@@ -439,13 +409,13 @@ namespace chess
             }
             if (j != chessboard.board_size - 1) //not at the edge right of the board
             {
-                if (c.board[i + 1, j + 1].isocupied() && c.board[i + 1, j + 1].Peace.is_white())//normal capture right
+                if (c.board[bpawn.position + 9].isocupied() && c.board[bpawn.position + 9].Peace.is_white())//normal capture right
                 {
                     moves.Add(new Move(bpawn.position, bpawn.position + 9));
                 }
-                else if (jfinal != 15 && c.board[i, j + 1].isocupied())
+                else if (jfinal != 15 && c.board[bpawn.position + 1].isocupied())
                 {
-                    lastmovepeace = c.board[i, j + 1].Peace;
+                    lastmovepeace = c.board[bpawn.position + 1].Peace;
                     if (Peace.Pawn == lastmovepeace.type && lastmovepeace.is_white())// En passant right
                     {
                         if (jfinal == j + 1 && ifinal == i && istart == i + 2)
@@ -483,7 +453,7 @@ namespace chess
                     {
                         int tmpi = i + first;
                         int tmpj = j + second;
-                        if (tmpi < 0 || tmpi > chessboard.board_size - 1 || tmpj < 0 || tmpj > chessboard.board_size - 1 || (c.board[tmpi, tmpj].isocupied() && c.board[tmpi, tmpj].Peace.color == knight.color))
+                        if (tmpi < 0 || tmpi > chessboard.board_size - 1 || tmpj < 0 || tmpj > chessboard.board_size - 1 || (c.board[tmpi * chessboard.board_size + tmpj].isocupied() && c.board[tmpi * chessboard.board_size + tmpj].Peace.color.Equals(knight.color)))
                         {//the knight moves out of the board boundaries or land on a peace of its own color
                             second *= -1;
                             continue;
@@ -497,7 +467,7 @@ namespace chess
                 second = 2;
             }
         }
-        private void Getmoves_king_pc(Peace king, List<Move> moves) 
+        private void Getmoves_king_pc(Peace king, List<Move> moves)
         {
             int i = king.get_i_pos();
             int j = king.get_j_pos();
@@ -507,14 +477,15 @@ namespace chess
             int row = chessboard.getoffset(king.color);
             if (c.can_castle[row])//castle both sides
             {
+                int oned_i = king.get_i_pos() * chessboard.board_size;
                 if (c.can_castle[row + 1])//left
                 {
-                    if (!c.board[i, 1].isocupied() && !c.board[i, 2].isocupied() && !c.board[i, 3].isocupied())
+                    if (!c.board[oned_i + 1].isocupied() && !c.board[oned_i + 2].isocupied() && !c.board[oned_i + 3].isocupied())
                         moves.Add(new Move(king.position, king.position-2, Move.castle));
                 }
                 if (c.can_castle[row + 2])//right
                 {
-                    if (!c.board[i, 5].isocupied() && !c.board[i, 6].isocupied())
+                    if (!c.board[oned_i + 5].isocupied() && !c.board[oned_i + 6].isocupied())
                     {
                         //if(king.position == 4)
                             //this.c.printstatics();
@@ -527,34 +498,32 @@ namespace chess
             Boolean[] borders = { j != 0, i != 7, j != 7, i != 0 };// 0left, 1down, 2right, 3up
 
             //same raw as starting posiotion
-            if (borders[2] && c.board[i, j + 1].canmove(king))
+            if (borders[2] && c.board[king.position + 1].canmove(king))
                 moves.Add(new Move(king.position, king.position + 1, edgecase));
-            if (borders[0] && c.board[i, j - 1].canmove(king))
+            if (borders[0] && c.board[king.position - 1].canmove(king))
                 moves.Add(new Move(king.position, king.position - 1, edgecase));
             //
 
             //raw down to the starting posiotion
-            i++;
             if (borders[1])
             {
-                if (borders[0] && c.board[i, j - 1].canmove(king))
+                if (borders[0] && c.board[king.position + 7].canmove(king))
                     moves.Add(new Move(king.position, king.position +7, edgecase));
-                if (c.board[i, j].canmove(king))
+                if (c.board[king.position+8].canmove(king))
                     moves.Add(new Move(king.position, king.position +8, edgecase));
-                if (borders[2] && c.board[i, j + 1].canmove(king))
+                if (borders[2] && c.board[king.position + 9].canmove(king))
                     moves.Add(new Move(king.position, king.position +9, edgecase));
             }
             //
 
             //raw up to the starting posiotion
-            i -= 2;
             if (borders[3])
             {
-                if (borders[0] && c.board[i, j - 1].canmove(king))
+                if (borders[0] && c.board[king.position - 9].canmove(king))
                     moves.Add(new Move(king.position, king.position -9, edgecase));
-                if (c.board[i, j].canmove(king))
+                if (c.board[king.position - 8].canmove(king))
                     moves.Add(new Move(king.position, king.position -8, edgecase));
-                if (borders[2] && c.board[i, j + 1].canmove(king))
+                if (borders[2] && c.board[king.position - 7].canmove(king))
                     moves.Add(new Move(king.position, king.position -7, edgecase));
             }
             //
@@ -592,7 +561,7 @@ namespace chess
         private List<Move> Generatelegalmovesfrompseudolegal(List<Move> pseudolegalmoves)
         {
             int king_pos = this.c.get_king_pos(this.c.color_turn);
-            if (this.c.there_arent_attacks_or_pins(chessboard.get_i_pos(king_pos), chessboard.get_j_pos(king_pos))) //making sure king movement is ok
+            if (this.c.there_arent_attacks_or_pins(king_pos)) //making sure king movement is ok
             {
                 for(int i = pseudolegalmoves.Count-1; i >= 0; i--)//the king movements are at the end of the pseudolegalmoves list
                 {

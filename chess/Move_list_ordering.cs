@@ -37,7 +37,7 @@ namespace chess
         {
             //https://www.chessprogramming.org/Move_Ordering#Standard_techniques
             int score = 0;
-            Peace movepeace = this.chessboard.board[chessboard.get_i_pos(move.startsquare), chessboard.get_j_pos(move.startsquare)].Peace;
+            Peace movepeace = this.chessboard.board[move.startsquare].Peace;
             int movePieceType = movepeace.type;
             int edgecase = move.edgecase;
 

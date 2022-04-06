@@ -38,7 +38,7 @@ namespace chess
         //return string representation of all of the info about the peace
         override public string ToString()
         {
-            if(color == white)
+            if(color.Equals(white))
                 return this.get_type_char_rep() + ", white, position:[" + this.get_i_pos() + "," + this.get_j_pos() + "]";
             else
                 return this.get_type_char_rep() + ", black, position:["+ this.get_i_pos() + ","+ this.get_j_pos() + "]";
@@ -48,31 +48,31 @@ namespace chess
         {
             switch (this.type)
             {
-                case 0:
-                    if(color == white)
+                case Pawn:
+                    if(color.Equals(white))
                         return 'P';
                     return 'p';
-                case 1:
-                    if (color == white)
+                case Knight:
+                    if (color.Equals(white))
                         return 'N';
                     return 'n';
                 //
-                case 2:
-                    if (color == white)
+                case Bishop:
+                    if (color.Equals(white))
                         return 'B';
                     return 'b';
-                case 3:
-                    if (color == white)
+                case Rook:
+                    if (color.Equals(white))
                         return 'R';
                     return 'r';
                 //
-                case 4:
-                    if (color == white)
+                case Queen:
+                    if (color.Equals(white))
                         return 'Q';
                     return 'q';
                 //
-                case 5:
-                    if (color == white)
+                case King:
+                    if (color.Equals(white))
                         return 'K';
                     return 'k';
                     //
@@ -112,15 +112,11 @@ namespace chess
 
         public bool is_white()
         {
-            return color == white;
-            return (color & (1 << black)) != white; //check if the first bit in the byte is set
-            //black means it check the 0 position in the byte(the first position)
+            return color.Equals(white);
         }
         public bool is_black()
         {
-            return color == black;
-            return (color & (1 << black)) != black; //check if the first bit in the byte is set
-            //black means it check the 0 position in the byte(the first position)
+            return color.Equals(black);
         }
 
     }

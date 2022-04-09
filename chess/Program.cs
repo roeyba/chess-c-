@@ -18,7 +18,7 @@ namespace chess
             //p.event_handler();
 
             
-            string fen = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ";
+            string fen = "rnbqkbnr/pppp3p/5p2/4p3/4P3/6pK/PPPP1PPP/RNBQ1BNR b kq";
             chessboard board = new chessboard(fen);
             board.printstatics();
             Console.WriteLine("start position");

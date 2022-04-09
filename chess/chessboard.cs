@@ -188,7 +188,8 @@ namespace chess
 
             //create all of the kings
             addpeacetoboardandlist(new King(black, 4)); addpeacetoboardandlist(new King(white, 60));
-            
+            //seting whites turn
+            setplayerturn(true);
         }
 
         public chessboard(string FEN_notation)
@@ -239,9 +240,9 @@ namespace chess
             
             LoopEnd:
             if (Char.ToLower(FEN_notation[counter++]) == 'w')
-                this.color_turn = white;
+                setplayerturn(true);
             else
-                this.color_turn = black;
+                setplayerturn(false);
             counter = counter + 1;
             this.can_castle[1] = false;
             this.can_castle[2] = false;
@@ -543,7 +544,7 @@ namespace chess
             }
         }
         
-        public void manualy_makemove(string four_letters_position, int edgecase)
+        public void manualy_makemove(string four_letters_position)
         {// example: "a1a2"
             //this function works acording to the real notation in a real chess game:
             /*
@@ -925,7 +926,12 @@ namespace chess
             color_turn ^= black; //XOR's the first bit with 1, which toggles it.
             white_turn = !white_turn;
         }
-        
+        public void setplayerturn(bool iswhiteturn)
+        {
+            color_turn = iswhiteturn ? white : black; //XOR's the first bit with 1, which toggles it.
+            white_turn = iswhiteturn;
+        }
+
         public Boolean is_white_turn()
         {
             return white_turn;

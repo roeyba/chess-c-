@@ -809,7 +809,7 @@ namespace chess
                         int pc_type = board[pos].Peace.type;
                         if ((pc_type == Peace.Bishop || pc_type == Peace.Queen) && defenders <= 1)
                             return true;
-                        if (i == 1)
+                        if (i == 0)
                         {
                             if (pc_type == Peace.King)
                                 return true;
@@ -852,7 +852,7 @@ namespace chess
         }
         //if there are no pins or attacks all of the psudo legal moves are also legal
         public bool there_arent_attacks_or_pins(int king_pos)
-        {
+        {          
             if (
                 there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.right_up, is_white_turn()) ||
                 there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.left_down, is_black_turn()) ||

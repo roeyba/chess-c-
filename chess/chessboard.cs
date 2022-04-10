@@ -712,7 +712,7 @@ namespace chess
         {
             return pos_in_check(get_king_pos(color_turn));
         }
-        private Boolean pos_in_check_at_diagonal(int position, int direction, Boolean pawn_attack_color)
+        private Boolean pos_in_check_at_diagonaly_up(int position, int direction)
         {
             int pos = position;
             for (int i = 0; i < Movegenerator.squers_to_edge[direction][position]; i++)
@@ -729,7 +729,33 @@ namespace chess
                         {
                             if (pc_type == Peace.King)
                                 return true;
-                            if (pawn_attack_color && pc_type == Peace.Pawn)
+                            if (is_white_turn() && pc_type == Peace.Pawn)
+                                return true;
+                        }
+                    }
+                    break;
+                }
+            }
+            return false;
+        }
+        private Boolean pos_in_check_at_diagonaly_down(int position, int direction)
+        {
+            int pos = position;
+            for (int i = 0; i < Movegenerator.squers_to_edge[direction][position]; i++)
+            {
+                pos += Movegenerator.directions[direction];
+                if (board[pos].isocupied())
+                {
+                    if (!board[pos].Peace.color.Equals(color_turn))
+                    {
+                        int pc_type = board[pos].Peace.type;
+                        if (pc_type == Peace.Bishop || pc_type == Peace.Queen)
+                            return true;
+                        if (i == 0)
+                        {
+                            if (pc_type == Peace.King)
+                                return true;
+                            if (is_black_turn() && pc_type == Peace.Pawn)
                                 return true;
                         }
                     }
@@ -751,7 +777,7 @@ namespace chess
                         int pc_type = board[pos].Peace.type;
                         if (pc_type == Peace.Rook || pc_type == Peace.Queen)
                             return true;
-                        if (pc_type == Peace.King && i==0)
+                        if (pc_type == Peace.King && i == 0)
                             return true;
                     }
                     break;
@@ -762,10 +788,10 @@ namespace chess
         public Boolean pos_in_check(int position)
         {
             if (
-                pos_in_check_at_diagonal(position, Movegenerator.right_up,is_white_turn()) ||
-                pos_in_check_at_diagonal(position, Movegenerator.left_down, is_black_turn()) ||
-                pos_in_check_at_diagonal(position, Movegenerator.left_up, is_white_turn()) ||
-                pos_in_check_at_diagonal(position, Movegenerator.right_down, is_black_turn()) ||
+                pos_in_check_at_diagonaly_up(position, Movegenerator.right_up) ||
+                pos_in_check_at_diagonaly_down(position, Movegenerator.left_down) ||
+                pos_in_check_at_diagonaly_up(position, Movegenerator.left_up) ||
+                pos_in_check_at_diagonaly_down(position, Movegenerator.right_down) ||
                 pos_in_check_at_verticle(position, Movegenerator.right) ||
                 pos_in_check_at_verticle(position, Movegenerator.left) ||
                 pos_in_check_at_verticle(position, Movegenerator.down) ||
@@ -795,7 +821,7 @@ namespace chess
             return false;
         }
 
-        private Boolean there_are_attacks_or_pins_at_diagonal(int position, int direction, Boolean pawn_attack_color)
+        private Boolean there_are_attacks_or_pins_at_diagonaly_up(int position, int direction)
         {
             int defenders = 0;
             int pos = position;
@@ -814,6 +840,36 @@ namespace chess
                             if (pc_type == Peace.King)
                                 return true;
                             if (is_white_turn() && pc_type == Peace.Pawn)
+                                return true;
+                        }
+                    }
+                    if (defenders == 1)
+                        break;
+                    else
+                        defenders++;
+                }
+            }
+            return false;
+        }
+        private Boolean there_are_attacks_or_pins_at_diagonaly_down(int position, int direction)
+        {
+            int defenders = 0;
+            int pos = position;
+            for (int i = 0; i < Movegenerator.squers_to_edge[direction][position]; i++)
+            {
+                pos += Movegenerator.directions[direction];
+                if (board[pos].isocupied())
+                {
+                    if (board[pos].Peace.color != color_turn) //oponent peace
+                    {
+                        int pc_type = board[pos].Peace.type;
+                        if ((pc_type == Peace.Bishop || pc_type == Peace.Queen) && defenders <= 1)
+                            return true;
+                        if (i == 0)
+                        {
+                            if (pc_type == Peace.King)
+                                return true;
+                            if (is_black_turn() && pc_type == Peace.Pawn)
                                 return true;
                         }
                     }
@@ -852,12 +908,12 @@ namespace chess
         }
         //if there are no pins or attacks all of the psudo legal moves are also legal
         public bool there_arent_attacks_or_pins(int king_pos)
-        {          
+        {
             if (
-                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.right_up, is_white_turn()) ||
-                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.left_down, is_black_turn()) ||
-                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.left_up, is_white_turn()) ||
-                there_are_attacks_or_pins_at_diagonal(king_pos, Movegenerator.right_down, is_black_turn()) ||
+                there_are_attacks_or_pins_at_diagonaly_up(king_pos, Movegenerator.right_up) ||
+                there_are_attacks_or_pins_at_diagonaly_down(king_pos, Movegenerator.left_down) ||
+                there_are_attacks_or_pins_at_diagonaly_up(king_pos, Movegenerator.left_up) ||
+                there_are_attacks_or_pins_at_diagonaly_down(king_pos, Movegenerator.right_down) ||
                 there_are_attacks_or_pins_at_verticle(king_pos, Movegenerator.right) ||
                 there_are_attacks_or_pins_at_verticle(king_pos, Movegenerator.left) ||
                 there_are_attacks_or_pins_at_verticle(king_pos, Movegenerator.down) ||

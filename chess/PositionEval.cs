@@ -240,22 +240,20 @@ namespace chess.types_of_peaces
                 {
                     foreach (Peace peace in parts[color][pctype])//one color scores
                     {
-                        Interlocked.Add(ref mg[color], mg_table[color][peace.type, peace.position]);
-                        Interlocked.Add(ref eg[color], eg_table[color][peace.type, peace.position]);
-                        Interlocked.Add(ref gamephase, gamephaseInc[peace.type]);
+                        mg[color] += mg_table[color][peace.type, peace.position];
+                        eg[color] += eg_table[color][peace.type, peace.position];
+                        gamephase += gamephaseInc[peace.type];
                     }
                 }
             });
 
 
             /* tapered eval */
-            int mgScore = mg[white] - mg[black];
-            int egScore = eg[white] - eg[black];
-            int mgPhase = gamephase;
-            if (mgPhase > 24) /* in case of early promotion */
-                mgPhase = 24;
-            int egPhase = 24 - mgPhase;//since 24 is the max value, egphase is the rest of the value
-            return (mgScore * mgPhase + egScore * egPhase) / 24;
+            // mgScore = mg[white] - mg[black];
+            //int egScore = eg[white] - eg[black];
+            int mgPhase = (gamephase > 24) ? 24 : gamephase;
+            //int egPhase = 24 - mgPhase;//since 24 is the max value, egphase is the rest of the value
+            return ((mg[white] - mg[black]) * mgPhase + (eg[white] - eg[black]) * (24 - mgPhase)) / 24;
             /*
              * add:
              * -penalty for not having pawns
@@ -264,14 +262,6 @@ namespace chess.types_of_peaces
              * -making sure the eval works in endgames
              * 
              */
-        }
-
-        //invoke the variables
-        private void update_peace(Peace peace, int color)
-        {
-            Interlocked.Add(ref mg[color], mg_table[color][peace.type, peace.position]);
-            Interlocked.Add(ref eg[color], eg_table[color][peace.type, peace.position]);
-            Interlocked.Add(ref gamephase, gamephaseInc[peace.type]);
         }
 
     }

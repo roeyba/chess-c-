@@ -75,7 +75,7 @@ namespace chess
          *        
          *        
          *        
-         *   (i)
+         *   (i)//position representation at my project
          *      +---+---+---+---+---+---+---+---+
          *    0 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
          *      +---+---+---+---+---+---+---+---+
@@ -96,7 +96,7 @@ namespace chess
          *        0   1   2   3   4   5   6   7  (j)
          *        
          *    
-         *    (i)
+         *    (i) //real world representation
          *      +---+---+---+---+---+---+---+---+
          *    8 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
          *      +---+---+---+---+---+---+---+---+
@@ -606,7 +606,7 @@ namespace chess
                     tmp += "|\n";
                 }
             }
-            tmp += "     0   1   2   3   4   5   6   7  \n";
+            tmp += "     a   b   c   d   e   f   g   h  \n";
             if (!tmp.Equals(ToStringfromlist()))
             {
                 Console.WriteLine("the list and board arent syncronised!");
@@ -672,7 +672,7 @@ namespace chess
                     tmp += "|\n";
                 }
             }
-            tmp += "     0   1   2   3   4   5   6   7  \n";
+            tmp += "     a   b   c   d   e   f   g   h  \n";
             return tmp;
         }
 

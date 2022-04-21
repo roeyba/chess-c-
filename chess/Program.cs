@@ -20,15 +20,14 @@ namespace chess
             
             string fen = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
             chessboard board = new chessboard(fen);
-            board.printstatics();
             Console.WriteLine("start position");
             board.printstatics();
 
             
-            int nodes = board.generator.Perft(5);
-            Console.WriteLine(nodes+" leaf nodes");
-            //Move best_move = board.generator.choose_move(depth: 5,board.white_turn);
-            //Console.WriteLine(best_move.to_mininal_string());
+            //int nodes = board.generator.Perft(5);
+            //Console.WriteLine(nodes+" leaf nodes");
+            Move best_move = board.generator.choose_move(depth: 5,board.white_turn);
+            Console.WriteLine(best_move.to_mininal_string());
             
             Console.WriteLine("end position");
             board.printstatics();

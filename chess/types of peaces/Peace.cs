@@ -39,12 +39,12 @@ namespace chess
         override public string ToString()
         {
             if(color.Equals(white))
-                return this.get_type_char_rep() + ", white, position:[" + this.get_i_pos() + "," + this.get_j_pos() + "]";
+                return this.Get_type_char_rep() + ", white, position:[" + this.Get_i_pos() + "," + this.Get_j_pos() + "]";
             else
-                return this.get_type_char_rep() + ", black, position:["+ this.get_i_pos() + ","+ this.get_j_pos() + "]";
+                return this.Get_type_char_rep() + ", black, position:["+ this.Get_i_pos() + ","+ this.Get_j_pos() + "]";
         }
         
-        public char get_type_char_rep()
+        public char Get_type_char_rep()
         {
             switch (this.type)
             {
@@ -80,15 +80,15 @@ namespace chess
             return '#';
         }
 
-        public int[] get_xy_pos()
+        public int[] Get_xy_pos()
         {
             return new int[] { this.position / 8, this.position % 8 };
         }
-        public int get_i_pos()
+        public int Get_i_pos()
         {//return the i value of the peace the board matrix
             return this.position / 8;
         }
-        public int get_j_pos()
+        public int Get_j_pos()
         {//return the i value of the peace the board matrix
             return this.position % 8;
         }
@@ -110,11 +110,11 @@ namespace chess
             return int.MaxValue;
         }
 
-        public bool is_white()
+        public bool Is_white()
         {
             return color.Equals(white);
         }
-        public bool is_black()
+        public bool Is_black()
         {
             return color.Equals(black);
         }

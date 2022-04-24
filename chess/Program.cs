@@ -19,18 +19,18 @@ namespace chess
 
             
             string fen = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
-            chessboard board = new chessboard(fen);
+            Chessboard board = new Chessboard(fen);
             Console.WriteLine("start position");
-            board.printstatics();
+            board.Printstatics();
 
             
             //int nodes = board.generator.Perft(5);
             //Console.WriteLine(nodes+" leaf nodes");
-            Move best_move = board.generator.choose_move(depth: 5,board.white_turn);
-            Console.WriteLine(best_move.to_mininal_string());
+            Move best_move = board.generator.Choose_move(depth: 5,board.white_turn);
+            Console.WriteLine(best_move.To_mininal_string());
             
             Console.WriteLine("end position");
-            board.printstatics();
+            board.Printstatics();
             
 
             stopwatch.Stop(); Console.WriteLine("Elapsed Time is {0} seconds", (float)stopwatch.ElapsedMilliseconds/1000);
@@ -38,7 +38,7 @@ namespace chess
         }
         private void event_handler()
         {
-            chessboard board = new chessboard();
+            Chessboard board = new Chessboard();
             string input = Console.ReadLine();
             while (!input.Equals("done"))
             {
@@ -54,7 +54,7 @@ namespace chess
                         break;
                     case string s when s.StartsWith("position fen"):
                         input.Remove(0, 13);
-                        board = new chessboard(input);
+                        board = new Chessboard(input);
                         break;
                     case "":
                         Console.WriteLine();

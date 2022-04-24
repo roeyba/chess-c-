@@ -11,7 +11,7 @@ namespace chess.types_of_peaces
     {
         internal readonly List<Peace>[][] parts;
 
-        public PositionEval(chessboard chessboard)
+        public PositionEval(Chessboard chessboard)
         {
             parts = new List<Peace>[2][];
 
@@ -189,8 +189,8 @@ namespace chess.types_of_peaces
         private short[][,] mg_table;
         private short[][,] eg_table;
 
-        private int[] mg;//holds the score in the middle game faze
-        private int[] eg;//holds the score in the end game faze
+        private readonly int[] mg;//holds the score in the middle game faze
+        private readonly int[] eg;//holds the score in the end game faze
         private int gamephase;
 
         //init the overall score each peace gets in every place on the board and in any game phase.
@@ -236,7 +236,7 @@ namespace chess.types_of_peaces
             /* evaluate each piece */
             Parallel.For(white, 2, (color) =>
             {
-                for (int pctype = Peace.Pawn; pctype < chessboard.peaces_types_amount; pctype++)
+                for (int pctype = Peace.Pawn; pctype < Chessboard.peaces_types_amount; pctype++)
                 {
                     foreach (Peace peace in parts[color][pctype])//one color scores
                     {

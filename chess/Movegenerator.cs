@@ -67,7 +67,7 @@ namespace chess
         }
         public bool Peacepromote()
         {
-            if (this.edgecase == Move.pawn_promote_to_queen || this.edgecase == Move.pawn_promote_to_rook || this.edgecase == Move.pawn_promote_to_bishop || this.edgecase == Move.pawn_promote_to_knight)
+            if (this.edgecase != Move.None_edgcase && this.edgecase >= Move.pawn_promote_to_knight && this.edgecase <= Move.pawn_promote_to_queen)
                 return true;
             return false;
         }
@@ -607,11 +607,11 @@ namespace chess
         }
 
         //return the move the AI wants to play.
-        public Move Choose_move(int depth, bool iswhite) //the assamption is that the game isnt over yet
+        public Move Choose_move(int depth, bool for_white_player) //the assamption is that the game isnt over yet
         {
             //aplpha: the worst posible score for white - negative infinity
             //beta: the worst posible score for black - positive infinity
-            if (iswhite) { return AlphaBetaMax_getmove(alpha: int.MinValue, beta: int.MaxValue, depth); }
+            if (for_white_player) { return AlphaBetaMax_getmove(alpha: int.MinValue, beta: int.MaxValue, depth); }
             //
             //
             return AlphaBetaMin_getmove(alpha: int.MinValue, beta: int.MaxValue, depth);

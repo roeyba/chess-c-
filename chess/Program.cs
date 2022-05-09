@@ -10,6 +10,7 @@ namespace chess
 {
     class Program
     {
+        //not used in the server
         static void Main(string[] args)
         {
             Console.ForegroundColor = ConsoleColor.Red;

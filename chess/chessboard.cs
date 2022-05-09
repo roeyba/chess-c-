@@ -15,13 +15,21 @@ namespace chess
         {
             this.Peace = peace;
         }
-        
+        /// <summary>
+        /// return wheter a tile is empty or not
+        /// </summary>
+        /// <returns></returns>
         public Boolean Isocupied()
         {
             if (this.Peace == null)
                 return false;
             return true;
         }
+        /// <summary>
+        /// return wheter a peace can move to that tile
+        /// </summary>
+        /// <param name="peace"></param>
+        /// <returns></returns>
         public Boolean Canmove(Peace peace) // if psudolegaly allowed to move a peace to that tile.
         {
             if (Isocupied())
@@ -116,7 +124,9 @@ namespace chess
          *        a   b   c   d   e   f   g   h  (j)
         */
 
-        //initialize all of the objects to null
+        /// <summary>
+        /// initialize all of the objects needed
+        /// </summary>
         private void Initialize_objects() 
         {
             for (int i = 0; i < amount_of_sq; i++)
@@ -157,7 +167,9 @@ namespace chess
             generator = new Movegenerator(this);
         }
 
-        //create an empty chess board and initialize it to beggining chess position 
+        /// <summary>
+        /// create an empty chess board and initialize it to beggining chess position
+        /// </summary>
         public Chessboard()
         {
 
@@ -191,6 +203,10 @@ namespace chess
             Setplayerturn(true);
         }
 
+        /// <summary>
+        /// create an empty chess board and initialize it accordint to the FEN notation
+        /// </summary>
+        /// <param name="FEN_notation"></param>
         public Chessboard(string FEN_notation)
         {
             Initialize_objects();
@@ -272,6 +288,10 @@ namespace chess
             //En passant target square ,Halfmove Clock and Fullmove counter are ignored;
         }
 
+        /// <summary>
+        /// return fen notation of the curent chess board
+        /// </summary>
+        /// <returns></returns>
         public string Get_fen_notation()
         {
             string fen = "";
@@ -319,21 +339,28 @@ namespace chess
             }
             return fen;
         }
-        //add peace in a unocupied Tile
+        
+        //add peace in a unocupied Tile + in the list
         private void Addpeacetoboardandlist(Peace peace) 
         {
             board[peace.position].Peace = peace;
             Addpeacetolist(peace);
         }
+        //remove a peace from the coresponding list
         private void Removepeacefromlist(Peace peace)
         {
             this.peaces[peace.color][peace.type].Remove(peace);
         }
+        //add a piece to the coresponding list
         private void Addpeacetolist(Peace peace)
         {
             this.peaces[peace.color][peace.type].Add(peace);
         }
         
+        /// <summary>
+        /// make a move, change all the data asociated with the board accordingly, afterwards changing color
+        /// </summary>
+        /// <param name="move"></param>
         public void Manualy_makemove(Move move) //make sure if its last move of the pawn that it is correct
         {
             Manualy_makemove_without_switching_turns(move);
@@ -345,6 +372,10 @@ namespace chess
         //no matter if there is a peace from the same color in it!!!!
         //not chacking if the peace than need to move exist!!!
         //not cheking if the move is legal
+        /// <summary>
+        /// makemake a move, change all the data asociated with the board accordingly
+        /// </summary>
+        /// <param name="move"></param>
         public void Manualy_makemove_without_switching_turns(Move move) //make sure if its last move of the pawn that it is correct
         {
             if (this.board[move.endsquare].Isocupied()) //if there is a cptured peace in this move
@@ -421,6 +452,12 @@ namespace chess
         //changing the castling rights according to the peace than moved and its position and if you make move or unmaking it
         //start position refers to the place the peace was before you make the move!!!
         //return edgecase number for a move
+        /// <summary>
+        /// change the casling rights after making a move
+        /// </summary>
+        /// <param name="iswhite"></param>
+        /// <param name="edgecase"></param>
+        /// <param name="jstartpo"></param>
         public void Change_castling_rights(Byte iswhite, int edgecase, int jstartpo)
         {
             if (Kingdidntmoved() && edgecase !=0)
@@ -444,6 +481,12 @@ namespace chess
             }// white all, white left , white right, black all , black left , black right
         }
         
+        /// <summary>
+        /// change the casling rights after unmaking a move
+        /// </summary>
+        /// <param name="edgecase"></param>
+        /// <param name="iswhite"></param>
+        /// <param name="startpo"></param>
         public void Unmake_castling_rights(int edgecase, Byte iswhite, int startpo)
         {
             if (edgecase != 0)
@@ -467,13 +510,18 @@ namespace chess
             }
         }
 
+        /// <summary>
+        /// unmake a move, change all the data asociated with the board accordingly, afterwards changing color
+        /// </summary>
         public void Unmakelastmove() //make sure if its last move of the pawn that it is correct
         {
             Unmakelastmove_without_switching_turns();
             Switchplayerturn();
         }
 
-        //return the chess board position back before the last move that has been made
+        /// <summary>
+        /// unmake a move, change all the data asociated with the board accordingly
+        /// </summary>
         public void Unmakelastmove_without_switching_turns()
         {
             Move move = this.moves.Pop();
@@ -543,6 +591,10 @@ namespace chess
             }
         }
         
+        /// <summary>
+        /// change the notation of a string move to the notation used in the engine, than make the move
+        /// </summary>
+        /// <param name="four_letters_position"></param>
         public void Manualy_makemove(string four_letters_position)
         {// example: "a1a2"
             //this function works acording to the real notation in a real chess game:
@@ -583,8 +635,11 @@ namespace chess
             }
             Console.WriteLine("move is ilegal...");
         }
-        
-        //return a string representation of the board
+
+        /// <summary>
+        /// return a string representation of the board from the board's matrix
+        /// </summary>
+        /// <returns>string_notation</returns>
         override public string ToString()
         {
             string tmp = "";
@@ -615,7 +670,10 @@ namespace chess
             return tmp;
         }
 
-        //return a string representation of the board from the list - used for testing internaly
+        /// <summary>
+        /// return a string representation of the board from the list
+        /// </summary>
+        /// <returns>string_notation</returns>
         private string ToStringfromlist()
         { //return a string representation of the board
             char[,] board2 = new char[board_size, board_size];
@@ -675,6 +733,11 @@ namespace chess
             return tmp;
         }
 
+        /// <summary>
+        /// get all of the played moves on the board so far
+        /// </summary>
+        /// <param name="with_new_lines"></param>
+        /// <returns></returns>
         public string Get_all_played_moves(bool with_new_lines =true)
         {
             if (this.moves.Count == 0)
@@ -705,8 +768,11 @@ namespace chess
             Console.WriteLine(this.Get_all_played_moves());
         }
 
-        //return if the current players turn king's is in check
         //this fun check if the king is in check from the king's eye sight
+        /// <summary>
+        /// retun wheter the current player king is in check
+        /// </summary>
+        /// <returns></returns>
         public Boolean Current_player_king_in_check()
         {
             return Pos_in_check(Get_king_pos(color_turn));
@@ -784,6 +850,11 @@ namespace chess
             }
             return false;
         }
+        /// <summary>
+        /// check if the position is ander attack
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
         public Boolean Pos_in_check(int position)
         {
             if (
@@ -905,7 +976,12 @@ namespace chess
             }
             return false;
         }
-        //if there are no pins or attacks all of the psudo legal moves are also legal
+
+        /// <summary>
+        /// check if there are no pins or attacks, if so that means all of the psudo legal moves are also legal in this position
+        /// </summary>
+        /// <param name="king_pos"></param>
+        /// <returns></returns>
         public bool There_arent_attacks_or_pins(int king_pos)
         {
             if (

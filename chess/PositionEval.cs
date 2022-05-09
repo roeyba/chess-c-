@@ -193,7 +193,9 @@ namespace chess.types_of_peaces
         private readonly int[] eg;//holds the score in the end game faze
         private int gamephase;
 
-        //init the overall score each peace gets in every place on the board and in any game phase.
+        /// <summary>
+        /// init the overall score each peace gets in every place on the board and in any game phase.
+        /// </summary>
         void Init_tables()
         {
             //types of peaces *2 , squere location on the board
@@ -224,6 +226,10 @@ namespace chess.types_of_peaces
         //Evaluate()<0   => black is doing better.// no matter which players turn it is!
         //doesnt ivaluate checkmates and draws correctly intentialy.
         //this evaluataion is used after the opening faze of the game
+        /// <summary>
+        /// gets a integer representing the score of the position in white's perspective.
+        /// </summary>
+        /// <returns></returns>
         public int Evaluate()
         {
             gamephase = 0;

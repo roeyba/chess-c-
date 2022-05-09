@@ -41,7 +41,10 @@ namespace chess
         public const int king_moving = 7; //the king hasnt moved once since the beggining of the game
         public const int rook_moving = 8; //the rook hasnt moved once since the beggining of the game
         public const int enpassant = 9;
-
+        /// <summary>
+        /// returns the string representation of the move
+        /// </summary>
+        /// <returns></returns>
         public string Print_in_notation()
         {
             string promotion_peace = "";
@@ -65,6 +68,10 @@ namespace chess
             }
             return "[" + Chessboard.Get_j_pos_as_letter(startsquare) + "," + Math.Abs(Chessboard.Get_i_pos(startsquare) - 8) + "]" + "[" + Chessboard.Get_j_pos_as_letter(endsquare) + "," + Math.Abs(Chessboard.Get_i_pos(endsquare) - 8) + "]"+ promotion_peace+": ";
         }
+        /// <summary>
+        /// return if the move is promotion
+        /// </summary>
+        /// <returns></returns>
         public bool Peacepromote()
         {
             if (this.edgecase != Move.None_edgcase && this.edgecase >= Move.pawn_promote_to_knight && this.edgecase <= Move.pawn_promote_to_queen)
@@ -527,11 +534,22 @@ namespace chess
 
 
         //Wrapping Operation - only for outside usege!
+        /// <summary>
+        /// return the number of leaf node in the minimx tree
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <returns></returns>
         public int Perft(int depth)
         {
             return Perfit(depth, depth);
         }
         //internal Operation - only for inside usege!
+        /// <summary>
+        /// return the number of leaf node in the minimx tree and print it
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <param name="headnode"></param>
+        /// <returns></returns>
         private int Perfit(int depth, int headnode)
         {
             if (depth == 0) // if got to a leaf node
@@ -553,7 +571,11 @@ namespace chess
             return leafnodes;
         }
 
-        //gets a list of pseudo-legal moves and return a list with all of the legal moves in this list
+        /// <summary>
+        /// gets a list of pseudo-legal moves and return a list with all of the legal moves in this list
+        /// </summary>
+        /// <param name="pseudolegalmoves"></param>
+        /// <returns></returns>
         private List<Move> Generatelegalmovesfrompseudolegal(List<Move> pseudolegalmoves)
         {
             int king_pos = this.c.Get_king_pos(this.c.color_turn);
@@ -606,7 +628,12 @@ namespace chess
             return legalmoves;
         }
 
-        //return the move the AI wants to play.
+        /// <summary>
+        /// return the move the AI decided to play
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <param name="for_white_player"></param>
+        /// <returns></returns>
         public Move Choose_move(int depth, bool for_white_player) //the assamption is that the game isnt over yet
         {
             //aplpha: the worst posible score for white - negative infinity
@@ -617,8 +644,13 @@ namespace chess
             return AlphaBetaMin_getmove(alpha: int.MinValue, beta: int.MaxValue, depth);
         }
         
-        // a rapt functions for minimx, return the optimal Move obj.
-        //minmax and alpha beta pruning.
+        /// <summary>
+        /// return the best move from of the current position for the maximizing player.
+        /// </summary>
+        /// <param name="alpha"></param>
+        /// <param name="beta"></param>
+        /// <param name="depth"></param>
+        /// <returns></returns>
         public Move AlphaBetaMax_getmove(int alpha, int beta, int depth)
         {
             //assuming deph>0 and there are at least one move to be made at that position
@@ -642,6 +674,13 @@ namespace chess
             }
             return best_move;
         }
+        /// <summary>
+        /// return the best move from of the current position for the minimizing player.
+        /// </summary>
+        /// <param name="alpha"></param>
+        /// <param name="beta"></param>
+        /// <param name="depth"></param>
+        /// <returns></returns>
         public Move AlphaBetaMin_getmove(int alpha, int beta, int depth)
         {
             //assuming deph>0 and there are at least one move to be made at that position
@@ -719,13 +758,21 @@ namespace chess
             return beta;
         }
 
-        //generate captured legal moves
+        /// <summary>
+        /// generate captured legal moves
+        /// </summary>
+        /// <returns>capture_legal_moves</returns>
         private List<Move> Getcapturesmoves()
         {
             return Generatelegalmovesfrompseudolegal(Generate_psudo_legal_moves().FindAll(move => move.capturedpeace != null));
         }
 
-        //minimax for captured moves
+        /// <summary>
+        /// search tree for only captured moves
+        /// </summary>
+        /// <param name="alpha"></param>
+        /// <param name="beta"></param>
+        /// <returns></returns>
         public int AlphaBetaMaxcapture(int alpha, int beta)
         {
             int eval = this.c.Evaluate();
@@ -749,6 +796,12 @@ namespace chess
             }
             return alpha;
         }
+        /// <summary>
+        /// search tree for only captured moves
+        /// </summary>
+        /// <param name="alpha"></param>
+        /// <param name="beta"></param>
+        /// <returns></returns>
         public int AlphaBetaMincapture(int alpha, int beta)
         {
             int eval = this.c.Evaluate();

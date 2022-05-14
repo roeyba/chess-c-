@@ -655,7 +655,7 @@ namespace chess
         {
             //assuming deph>0 and there are at least one move to be made at that position
             List<Move> child_nodes = this.mo.OrdereMoves(this.c.generator.Generate_all_legal_moves());
-            Move best_move =new Move();
+            Move best_move = child_nodes[0];//assuming the function will return a move(and there is one)
 
             for (int i = 0; i < child_nodes.Count; i++)
             {
@@ -685,7 +685,7 @@ namespace chess
         {
             //assuming deph>0 and there are at least one move to be made at that position
             List<Move> child_nodes = this.mo.OrdereMoves(this.c.generator.Generate_all_legal_moves());
-            Move best_move = new Move();
+            Move best_move = child_nodes[0];//assuming the function will return a move(and there is one)
 
             for (int i = 0; i < child_nodes.Count; i++)
             {
@@ -693,7 +693,7 @@ namespace chess
                 this.c.Manualy_makemove(child_nodes[i]);
                 int score = AlphaBetaMax(alpha, beta, depth - 1);
                 //Console.WriteLine("Score: " + score);
-                this.c.Unmakelastmove();
+                this.c.Unmakelastmove();             
                 if (score <= alpha)
                     return child_nodes[i];   // fail hard beta-cutoff
                 if (score < beta)

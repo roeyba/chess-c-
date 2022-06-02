@@ -80,7 +80,7 @@ namespace chess
         }
         public string To_mininal_string()
         {
-            return (startsquare.ToString() +","+ endsquare.ToString());
+            return (startsquare.ToString() +","+ endsquare.ToString()+"#"+edgecase);
         }
     }
     
